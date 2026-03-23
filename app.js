@@ -17,7 +17,6 @@ const elements = {
     energiaFaltante: document.querySelector("#energiaFaltante"),
     percentualDistribuido: document.querySelector("#percentualDistribuido"),
     percentualFaltante: document.querySelector("#percentualFaltante"),
-    valorFaturaTotal: document.querySelector("#valorFaturaTotal"),
     listaUnidades: document.querySelector("#listaUnidades"),
     resultadoRateio: document.querySelector("#resultadoRateio"),
     unidadeTemplate: document.querySelector("#unidadeTemplate")
@@ -87,7 +86,6 @@ function renderResumo(distribuicao) {
     const energiaFaltante = Math.max(somaMedias - totalDistribuido, 0);
     const percentualDistribuido = somaMedias > 0 ? totalDistribuido / somaMedias : 0;
     const percentualFaltante = Math.max(1 - percentualDistribuido, 0);
-    const valorFaturaTotal = totalDistribuido * VALOR_KWH;
 
     elements.totalUnidades.textContent = String(distribuicao.length);
     elements.somaMedias.textContent = formatarNumero(somaMedias);
@@ -95,7 +93,6 @@ function renderResumo(distribuicao) {
     elements.energiaFaltante.textContent = formatarNumero(energiaFaltante);
     elements.percentualDistribuido.textContent = formatarPercentual(percentualDistribuido);
     elements.percentualFaltante.textContent = formatarPercentual(percentualFaltante);
-    elements.valorFaturaTotal.textContent = formatarMoeda(valorFaturaTotal);
 }
 
 function renderLista(distribuicao) {
