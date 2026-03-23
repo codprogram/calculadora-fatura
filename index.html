@@ -34,12 +34,28 @@
                 <strong id="totalUnidades" class="summary-value">0</strong>
             </article>
             <article class="summary-card card">
-                <span class="summary-label">Soma das medias</span>
+                <span class="summary-label">Consumo medio total (kWh)</span>
                 <strong id="somaMedias" class="summary-value">0,00</strong>
             </article>
             <article class="summary-card card">
-                <span class="summary-label">Total distribuido</span>
+                <span class="summary-label">kWh ja distribuidos</span>
                 <strong id="totalDistribuido" class="summary-value">0,00</strong>
+            </article>
+            <article class="summary-card card">
+                <span class="summary-label">kWh faltando distribuir</span>
+                <strong id="energiaFaltante" class="summary-value">0,00</strong>
+            </article>
+            <article class="summary-card card">
+                <span class="summary-label">% distribuido</span>
+                <strong id="percentualDistribuido" class="summary-value">0,00%</strong>
+            </article>
+            <article class="summary-card card">
+                <span class="summary-label">% faltante</span>
+                <strong id="percentualFaltante" class="summary-value">0,00%</strong>
+            </article>
+            <article class="summary-card card">
+                <span class="summary-label">Valor estimado da fatura</span>
+                <strong id="valorFaturaTotal" class="summary-value">R$ 0,00</strong>
             </article>
         </section>
 
@@ -55,7 +71,7 @@
             <section class="card panel result-panel">
                 <div class="panel-header">
                     <h2>Resultado do rateio</h2>
-                    <p>Distribuicao proporcional sobre a soma das medias.</p>
+                    <p>Distribuicao proporcional sobre o consumo medio total, com valor de referencia de R$ 1,17 por kWh.</p>
                 </div>
                 <div id="resultadoRateio" class="result-list"></div>
             </section>

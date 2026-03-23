@@ -3,6 +3,7 @@ const initialUnits = [
     { id: crypto.randomUUID(), nome: "Beneficiaria 1", media: "90" },
     { id: crypto.randomUUID(), nome: "Beneficiaria 2", media: "75" }
 ];
+const VALOR_KWH = 1.17;
 
 const state = {
     geracaoTotal: "10000",
@@ -15,6 +16,10 @@ const elements = {
     totalUnidades: document.querySelector("#totalUnidades"),
     somaMedias: document.querySelector("#somaMedias"),
     totalDistribuido: document.querySelector("#totalDistribuido"),
+    energiaFaltante: document.querySelector("#energiaFaltante"),
+    percentualDistribuido: document.querySelector("#percentualDistribuido"),
+    percentualFaltante: document.querySelector("#percentualFaltante"),
+    valorFaturaTotal: document.querySelector("#valorFaturaTotal"),
     listaUnidades: document.querySelector("#listaUnidades"),
     resultadoRateio: document.querySelector("#resultadoRateio"),
     unidadeTemplate: document.querySelector("#unidadeTemplate")
@@ -43,6 +48,13 @@ function formatarPercentual(valor) {
     return `${formatarNumero(valor * 100)}%`;
 }
 
+function formatarMoeda(valor) {
+    return new Intl.NumberFormat("pt-BR", {
+        style: "currency",
+        currency: "BRL"
+    }).format(valor);
+}
+
 function unidadesCalculadas() {
     return state.unidades.map((unidade) => ({
         id: unidade.id,
@@ -58,22 +70,34 @@ function calcularPercentuais(unidades) {
 
 function distribuirEnergia(unidades, geracaoTotal) {
     const percentuais = calcularPercentuais(unidades);
+    const somaMedias = unidades.reduce((acc, unidade) => acc + unidade.media, 0);
+    const energiaRateada = Math.min(geracaoTotal, somaMedias);
+
     return unidades.map((unidade, index) => ({
         id: unidade.id,
         nome: unidade.nome,
         media: unidade.media,
         percentual: percentuais[index],
-        energia: percentuais[index] * geracaoTotal
+        energia: percentuais[index] * energiaRateada,
+        valorFatura: percentuais[index] * energiaRateada * VALOR_KWH
     }));
 }
 
 function renderResumo(distribuicao) {
     const somaMedias = distribuicao.reduce((acc, item) => acc + item.media, 0);
     const totalDistribuido = distribuicao.reduce((acc, item) => acc + item.energia, 0);
+    const energiaFaltante = Math.max(somaMedias - totalDistribuido, 0);
+    const percentualDistribuido = somaMedias > 0 ? totalDistribuido / somaMedias : 0;
+    const percentualFaltante = Math.max(1 - percentualDistribuido, 0);
+    const valorFaturaTotal = totalDistribuido * VALOR_KWH;
 
     elements.totalUnidades.textContent = String(distribuicao.length);
     elements.somaMedias.textContent = formatarNumero(somaMedias);
     elements.totalDistribuido.textContent = formatarNumero(totalDistribuido);
+    elements.energiaFaltante.textContent = formatarNumero(energiaFaltante);
+    elements.percentualDistribuido.textContent = formatarPercentual(percentualDistribuido);
+    elements.percentualFaltante.textContent = formatarPercentual(percentualFaltante);
+    elements.valorFaturaTotal.textContent = formatarMoeda(valorFaturaTotal);
 }
 
 function renderLista(distribuicao) {
@@ -153,7 +177,7 @@ function renderResultado(distribuicao) {
 
         const meta = document.createElement("div");
         meta.className = "result-meta";
-        meta.textContent = `Media: ${formatarNumero(item.media)} | Percentual: ${formatarPercentual(item.percentual)}`;
+        meta.textContent = `Consumo medio: ${formatarNumero(item.media)} kWh | Percentual: ${formatarPercentual(item.percentual)} | Fatura estimada: ${formatarMoeda(item.valorFatura)}`;
 
         top.append(nome, energia);
         article.append(top, meta);
