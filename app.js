@@ -20,6 +20,8 @@ const elements = {
     unidadeTemplate: document.querySelector("#unidadeTemplate")
 };
 
+let activeField = null;
+
 function parseNumero(texto) {
     if (!texto) return 0;
     const bruto = String(texto).trim().replace(/\s/g, "");
@@ -94,11 +96,23 @@ function renderLista(distribuicao) {
 
         nomeInput.addEventListener("input", (event) => {
             original.nome = event.target.value;
+            activeField = {
+                id: item.id,
+                role: "nome",
+                start: event.target.selectionStart,
+                end: event.target.selectionEnd
+            };
             render();
         });
 
         mediaInput.addEventListener("input", (event) => {
             original.media = event.target.value;
+            activeField = {
+                id: item.id,
+                role: "media",
+                start: event.target.selectionStart,
+                end: event.target.selectionEnd
+            };
             render();
         });
 
@@ -110,6 +124,8 @@ function renderLista(distribuicao) {
 
         elements.listaUnidades.appendChild(fragment);
     });
+
+    restoreActiveField();
 }
 
 function renderResultado(distribuicao) {
@@ -157,8 +173,45 @@ function render() {
     renderResultado(distribuicao);
 }
 
+function restoreActiveField() {
+    if (!activeField) return;
+
+    if (activeField.id === "geracao-total") {
+        elements.geracaoTotal.focus();
+        if (typeof activeField.start === "number" && typeof activeField.end === "number") {
+            elements.geracaoTotal.setSelectionRange(activeField.start, activeField.end);
+        }
+        return;
+    }
+
+    const unitCards = [...elements.listaUnidades.children];
+    const index = state.unidades.findIndex((unidade) => unidade.id === activeField.id);
+    if (index === -1) {
+        activeField = null;
+        return;
+    }
+
+    const target = unitCards[index]?.querySelector(`[data-role="${activeField.role}"]`);
+    if (!target) {
+        activeField = null;
+        return;
+    }
+
+    target.focus();
+
+    if (typeof activeField.start === "number" && typeof activeField.end === "number") {
+        target.setSelectionRange(activeField.start, activeField.end);
+    }
+}
+
 elements.geracaoTotal.addEventListener("input", (event) => {
     state.geracaoTotal = event.target.value;
+    activeField = {
+        id: "geracao-total",
+        role: "geracaoTotal",
+        start: event.target.selectionStart,
+        end: event.target.selectionEnd
+    };
     render();
 });
 
