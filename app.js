@@ -112,9 +112,9 @@ function renderLista(distribuicao) {
         nomeInput.value = original.nome;
         mediaInput.value = original.media;
 
-        fragment.querySelector('[data-role="metric-media"]').textContent = formatarNumero(item.media);
+        fragment.querySelector('[data-role="metric-media"]').textContent = `${formatarNumero(item.media)} kWh`;
         fragment.querySelector('[data-role="metric-percentual"]').textContent = formatarPercentual(item.percentual);
-        fragment.querySelector('[data-role="metric-energia"]').textContent = `${formatarNumero(item.energia)} kWh`;
+        fragment.querySelector('[data-role="metric-energia"]').textContent = formatarMoeda(item.valorFatura);
 
         nomeInput.addEventListener("input", (event) => {
             original.nome = event.target.value;

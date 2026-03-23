@@ -30,6 +30,7 @@ private struct UnidadeEditavel: Identifiable {
 }
 
 struct ContentView: View {
+    private let valorKWh = 1.17
     @State private var unidades: [UnidadeEditavel] = [
         UnidadeEditavel(nome: "", mediaTexto: "")
     ]
@@ -178,6 +179,7 @@ struct ContentView: View {
         let unidade = unidadesCalculadas[index]
         let percentual = percentuais.indices.contains(index) ? percentuais[index] : 0
         let energia = distribuicao.indices.contains(index) ? distribuicao[index].energia : 0
+        let valorFatura = energia * valorKWh
 
         return VStack(alignment: .leading, spacing: 12) {
             HStack {
@@ -202,9 +204,9 @@ struct ContentView: View {
             campoMedia(index: index)
 
             HStack(spacing: 10) {
-                metricaCard(titulo: "Media", valor: formatarNumero(unidade.media))
+                metricaCard(titulo: "Media (kWh)", valor: "\(formatarNumero(unidade.media)) kWh")
                 metricaCard(titulo: "Percentual", valor: formatarPercentual(percentual))
-                metricaCard(titulo: "Energia", valor: "\(formatarNumero(energia)) kWh")
+                metricaCard(titulo: "Valor da fatura", valor: formatarMoeda(valorFatura))
             }
         }
         .padding(16)
@@ -333,6 +335,14 @@ struct ContentView: View {
     private func formatarPercentual(_ valor: Double) -> String {
         let percentual = valor * 100
         return "\(formatarNumero(percentual))%"
+    }
+
+    private func formatarMoeda(_ valor: Double) -> String {
+        let formatador = NumberFormatter()
+        formatador.locale = Locale(identifier: "pt_BR")
+        formatador.numberStyle = .currency
+        formatador.currencyCode = "BRL"
+        return formatador.string(from: NSNumber(value: valor)) ?? "R$ 0,00"
     }
 }
 
