@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Rateio de Geracao</title>
+    <meta name="description" content="Calculadora de rateio por media de consumo para distribuicao de geracao em kWh.">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <main class="page">
+        <section class="hero card">
+            <div class="hero-copy">
+                <p class="eyebrow">Calculadora Web</p>
+                <h1>Rateio por media de consumo</h1>
+                <p class="hero-text">
+                    Informe a media de cada unidade, defina a geracao total e acompanhe o percentual de participacao e a energia distribuida em tempo real.
+                </p>
+            </div>
+
+            <div class="hero-actions">
+                <label class="field">
+                    <span>Geracao total (kWh)</span>
+                    <input id="geracaoTotal" type="text" inputmode="decimal" value="10000">
+                </label>
+
+                <button id="adicionarUnidade" class="primary-button" type="button">Adicionar unidade</button>
+            </div>
+        </section>
+
+        <section class="summary-grid">
+            <article class="summary-card card">
+                <span class="summary-label">Unidades</span>
+                <strong id="totalUnidades" class="summary-value">0</strong>
+            </article>
+            <article class="summary-card card">
+                <span class="summary-label">Soma das medias</span>
+                <strong id="somaMedias" class="summary-value">0,00</strong>
+            </article>
+            <article class="summary-card card">
+                <span class="summary-label">Total distribuido</span>
+                <strong id="totalDistribuido" class="summary-value">0,00</strong>
+            </article>
+        </section>
+
+        <section class="layout">
+            <section class="card panel">
+                <div class="panel-header">
+                    <h2>Unidades</h2>
+                    <p>Cadastre nome e media de consumo.</p>
+                </div>
+                <div id="listaUnidades" class="unit-list"></div>
+            </section>
+
+            <section class="card panel result-panel">
+                <div class="panel-header">
+                    <h2>Resultado do rateio</h2>
+                    <p>Distribuicao proporcional sobre a soma das medias.</p>
+                </div>
+                <div id="resultadoRateio" class="result-list"></div>
+            </section>
+        </section>
+    </main>
+
+    <template id="unidadeTemplate">
+        <article class="unit-card">
+            <div class="unit-top">
+                <label class="field">
+                    <span>Nome da unidade</span>
+                    <input data-role="nome" type="text" placeholder="Ex.: Geradora">
+                </label>
+                <button data-role="remover" class="icon-button" type="button" aria-label="Remover unidade">Excluir</button>
+            </div>
+
+            <label class="field">
+                <span>Media de consumo</span>
+                <input data-role="media" type="text" inputmode="decimal" placeholder="0">
+            </label>
+
+            <div class="metrics">
+                <div class="metric">
+                    <span class="metric-label">Media</span>
+                    <strong data-role="metric-media">0,00</strong>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Percentual</span>
+                    <strong data-role="metric-percentual">0,00%</strong>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Energia</span>
+                    <strong data-role="metric-energia">0,00 kWh</strong>
+                </div>
+            </div>
+        </article>
+    </template>
+
+    <script src="app.js"></script>
+</body>
+</html>

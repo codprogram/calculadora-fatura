@@ -1,66 +1,353 @@
-//
-//  ContentView.swift
-//  CALCULADORA-DE-FATURAS
-//
-//  Created by Marcos Gomes Filho on 23/03/26.
-//
-
 import SwiftUI
-import SwiftData
+
+struct Unidade: Identifiable {
+    let id = UUID()
+    var nome: String
+    var media: Double
+}
+
+private struct UnidadeEditavel: Identifiable {
+    let id = UUID()
+    var nome: String
+    var mediaTexto: String
+
+    init(nome: String, mediaTexto: String = "") {
+        self.nome = nome
+        self.mediaTexto = mediaTexto
+    }
+
+    var unidadeCalculada: Unidade {
+        Unidade(
+            nome: nome.isEmpty ? "Sem nome" : nome,
+            media: parseNumero(mediaTexto)
+        )
+    }
+
+    private func parseNumero(_ texto: String) -> Double {
+        let textoNormalizado = texto.replacingOccurrences(of: ",", with: ".")
+        return Double(textoNormalizado) ?? 0
+    }
+}
 
 struct ContentView: View {
-    @Environment(\.modelContext) private var modelContext
-    @Query private var items: [Item]
+    @State private var unidades: [UnidadeEditavel] = [
+        UnidadeEditavel(
+            nome: "Geradora",
+            mediaTexto: "120"
+        ),
+        UnidadeEditavel(
+            nome: "Beneficiaria 1",
+            mediaTexto: "90"
+        ),
+        UnidadeEditavel(
+            nome: "Beneficiaria 2",
+            mediaTexto: "75"
+        )
+    ]
+    @State private var geracaoTotalTexto = "10000"
+    private let corTitulo = Color(red: 0.09, green: 0.15, blue: 0.22)
+    private let corTexto = Color(red: 0.18, green: 0.24, blue: 0.31)
+    private let corSecundaria = Color(red: 0.38, green: 0.46, blue: 0.56)
+    private let corCampo = Color(red: 0.08, green: 0.13, blue: 0.19)
+
+    var unidadesCalculadas: [Unidade] {
+        unidades.map(\.unidadeCalculada)
+    }
+
+    var geracaoTotal: Double {
+        parseNumero(geracaoTotalTexto)
+    }
+
+    var percentuais: [Double] {
+        calcularPercentuais(unidades: unidadesCalculadas)
+    }
+
+    var distribuicao: [(nome: String, energia: Double)] {
+        distribuirEnergia(unidades: unidadesCalculadas, geracaoTotal: geracaoTotal)
+    }
+
+    var somaMedias: Double {
+        unidadesCalculadas.reduce(0) { $0 + $1.media }
+    }
+
+    var somaDistribuida: Double {
+        distribuicao.reduce(0) { $0 + $1.energia }
+    }
 
     var body: some View {
-        NavigationSplitView {
-            List {
-                ForEach(items) { item in
-                    NavigationLink {
-                        Text("Item at \(item.timestamp, format: Date.FormatStyle(date: .numeric, time: .standard))")
-                    } label: {
-                        Text(item.timestamp, format: Date.FormatStyle(date: .numeric, time: .standard))
-                    }
+        NavigationStack {
+            ScrollView {
+                VStack(spacing: 16) {
+                    cabecalho
+                    resumo
+                    listaUnidades
+                    painelResultado
                 }
-                .onDelete(perform: deleteItems)
+                .padding(16)
             }
-#if os(macOS)
-            .navigationSplitViewColumnWidth(min: 180, ideal: 200)
-#endif
-            .toolbar {
-#if os(iOS)
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    EditButton()
-                }
-#endif
-                ToolbarItem {
-                    Button(action: addItem) {
-                        Label("Add Item", systemImage: "plus")
-                    }
-                }
-            }
-        } detail: {
-            Text("Select an item")
+            .background(backgroundGradient)
+            .navigationTitle("Rateio de Geracao")
         }
     }
 
-    private func addItem() {
-        withAnimation {
-            let newItem = Item(timestamp: Date())
-            modelContext.insert(newItem)
+    private var backgroundGradient: some View {
+        LinearGradient(
+            colors: [
+                Color(red: 0.95, green: 0.97, blue: 0.98),
+                Color(red: 0.89, green: 0.93, blue: 0.95),
+                Color(red: 0.83, green: 0.89, blue: 0.93)
+            ],
+            startPoint: .topLeading,
+            endPoint: .bottomTrailing
+        )
+        .ignoresSafeArea()
+    }
+
+    private var cabecalho: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Distribuicao por media de consumo")
+                .font(.system(size: 26, weight: .bold, design: .rounded))
+                .foregroundStyle(corTitulo)
+
+            Text("Informe diretamente a media de consumo de cada unidade. O sistema calcula o percentual de participacao e distribui a geracao total em kWh.")
+                .font(.system(size: 13, weight: .medium, design: .rounded))
+                .foregroundStyle(corSecundaria)
+
+            HStack(spacing: 12) {
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("Geracao total (kWh)")
+                        .font(.system(size: 12, weight: .semibold, design: .rounded))
+                        .foregroundStyle(corSecundaria)
+
+                    TextField("0", text: $geracaoTotalTexto)
+                        .textFieldStyle(.plain)
+                        .font(.system(size: 18, weight: .bold, design: .rounded))
+                        .foregroundStyle(corCampo)
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 10)
+                        .background(
+                            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                                .fill(Color.white.opacity(0.92))
+                        )
+                }
+
+                Button(action: adicionarUnidade) {
+                    Label("Adicionar unidade", systemImage: "plus.circle.fill")
+                        .font(.system(size: 14, weight: .bold, design: .rounded))
+                        .foregroundStyle(.white)
+                        .padding(.horizontal, 14)
+                        .padding(.vertical, 12)
+                        .background(
+                            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                                .fill(Color(red: 0.13, green: 0.47, blue: 0.64))
+                        )
+                }
+                .buttonStyle(.plain)
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(18)
+        .background(cardBackground)
+    }
+
+    private var resumo: some View {
+        HStack(spacing: 12) {
+            resumoCard(titulo: "Unidades", valor: "\(unidades.count)", cor: Color(red: 0.19, green: 0.42, blue: 0.54))
+            resumoCard(titulo: "Soma das Medias", valor: formatarNumero(somaMedias), cor: Color(red: 0.16, green: 0.52, blue: 0.39))
+            resumoCard(titulo: "Total Distribuido", valor: formatarNumero(somaDistribuida), cor: Color(red: 0.70, green: 0.46, blue: 0.18))
         }
     }
 
-    private func deleteItems(offsets: IndexSet) {
-        withAnimation {
-            for index in offsets {
-                modelContext.delete(items[index])
+    private func resumoCard(titulo: String, valor: String, cor: Color) -> some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text(titulo)
+                .font(.system(size: 11, weight: .semibold, design: .rounded))
+                .foregroundStyle(corSecundaria)
+
+            Text(valor)
+                .font(.system(size: 22, weight: .bold, design: .rounded))
+                .foregroundStyle(cor)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(14)
+        .background(cardBackground)
+    }
+
+    private var listaUnidades: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Unidades")
+                .font(.system(size: 18, weight: .bold, design: .rounded))
+                .foregroundStyle(corTitulo)
+
+            ForEach(unidades.indices, id: \.self) { index in
+                unidadeCard(index: index)
             }
         }
+    }
+
+    private func unidadeCard(index: Int) -> some View {
+        let unidade = unidadesCalculadas[index]
+        let percentual = percentuais.indices.contains(index) ? percentuais[index] : 0
+        let energia = distribuicao.indices.contains(index) ? distribuicao[index].energia : 0
+
+        return VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                TextField("Nome da unidade", text: $unidades[index].nome)
+                    .textFieldStyle(.plain)
+                    .font(.system(size: 18, weight: .bold, design: .rounded))
+                    .foregroundStyle(corTitulo)
+
+                Spacer()
+
+                Button(role: .destructive) {
+                    excluirUnidade(at: index)
+                } label: {
+                    Image(systemName: "trash")
+                        .font(.system(size: 13, weight: .bold))
+                        .padding(8)
+                        .background(Color.red.opacity(0.10), in: Circle())
+                }
+                .buttonStyle(.plain)
+            }
+
+            campoMedia(index: index)
+
+            HStack(spacing: 10) {
+                metricaCard(titulo: "Media", valor: formatarNumero(unidade.media))
+                metricaCard(titulo: "Percentual", valor: formatarPercentual(percentual))
+                metricaCard(titulo: "Energia", valor: "\(formatarNumero(energia)) kWh")
+            }
+        }
+        .padding(16)
+        .background(cardBackground)
+    }
+
+    private func campoMedia(index: Int) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text("Media de consumo")
+                .font(.system(size: 11, weight: .semibold, design: .rounded))
+                .foregroundStyle(corSecundaria)
+
+            TextField("0", text: $unidades[index].mediaTexto)
+                .textFieldStyle(.plain)
+                .font(.system(size: 16, weight: .bold, design: .rounded))
+                .foregroundStyle(corCampo)
+                .padding(.horizontal, 10)
+                .padding(.vertical, 8)
+                .background(
+                    RoundedRectangle(cornerRadius: 12, style: .continuous)
+                        .fill(Color(red: 0.97, green: 0.98, blue: 0.99))
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12, style: .continuous)
+                        .stroke(Color(red: 0.80, green: 0.85, blue: 0.90), lineWidth: 1)
+                )
+        }
+    }
+
+    private func metricaCard(titulo: String, valor: String) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text(titulo)
+                .font(.system(size: 10, weight: .semibold, design: .rounded))
+                .foregroundStyle(corSecundaria)
+
+            Text(valor)
+                .font(.system(size: 15, weight: .bold, design: .rounded))
+                .foregroundStyle(corTexto)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(12)
+        .background(
+            RoundedRectangle(cornerRadius: 12, style: .continuous)
+                .fill(Color(red: 0.96, green: 0.98, blue: 1.0))
+        )
+    }
+
+    private var painelResultado: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Resultado do Rateio")
+                .font(.system(size: 18, weight: .bold, design: .rounded))
+                .foregroundStyle(corTitulo)
+
+            ForEach(Array(distribuicao.enumerated()), id: \.offset) { index, item in
+                HStack {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(item.nome)
+                            .font(.system(size: 15, weight: .bold, design: .rounded))
+                            .foregroundStyle(corTitulo)
+
+                        Text("Percentual: \(formatarPercentual(percentuais[index]))")
+                            .font(.system(size: 12, weight: .medium, design: .rounded))
+                            .foregroundStyle(corSecundaria)
+                    }
+
+                    Spacer()
+
+                    Text("\(formatarNumero(item.energia)) kWh")
+                        .font(.system(size: 16, weight: .bold, design: .rounded))
+                        .foregroundStyle(Color(red: 0.13, green: 0.47, blue: 0.64))
+                }
+                .padding(.vertical, 6)
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(16)
+        .background(cardBackground)
+    }
+
+    private var cardBackground: some View {
+        RoundedRectangle(cornerRadius: 20, style: .continuous)
+            .fill(Color.white.opacity(0.88))
+            .shadow(color: Color.black.opacity(0.05), radius: 8, x: 0, y: 4)
+    }
+
+    private func adicionarUnidade() {
+        unidades.append(UnidadeEditavel(nome: "Nova unidade", mediaTexto: "0"))
+    }
+
+    private func excluirUnidade(at index: Int) {
+        guard unidades.indices.contains(index), unidades.count > 1 else { return }
+        unidades.remove(at: index)
+    }
+
+    private func calcularPercentuais(unidades: [Unidade]) -> [Double] {
+        let somaMedias = unidades.reduce(0) { $0 + $1.media }
+
+        return unidades.map { unidade in
+            guard somaMedias > 0 else { return 0 }
+            return unidade.media / somaMedias
+        }
+    }
+
+    private func distribuirEnergia(unidades: [Unidade], geracaoTotal: Double) -> [(nome: String, energia: Double)] {
+        let percentuais = calcularPercentuais(unidades: unidades)
+
+        return unidades.enumerated().map { index, unidade in
+            (nome: unidade.nome, energia: percentuais[index] * geracaoTotal)
+        }
+    }
+
+    private func parseNumero(_ texto: String) -> Double {
+        let textoNormalizado = texto.replacingOccurrences(of: ",", with: ".")
+        return Double(textoNormalizado) ?? 0
+    }
+
+    private func formatarNumero(_ valor: Double) -> String {
+        let formatador = NumberFormatter()
+        formatador.locale = Locale(identifier: "pt_BR")
+        formatador.numberStyle = .decimal
+        formatador.minimumFractionDigits = 2
+        formatador.maximumFractionDigits = 2
+        return formatador.string(from: NSNumber(value: valor)) ?? "0,00"
+    }
+
+    private func formatarPercentual(_ valor: Double) -> String {
+        let percentual = valor * 100
+        return "\(formatarNumero(percentual))%"
     }
 }
 
 #Preview {
     ContentView()
-        .modelContainer(for: Item.self, inMemory: true)
+        .frame(width: 890, height: 650)
 }
