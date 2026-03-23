@@ -1,15 +1,15 @@
 const initialUnits = [
     { id: crypto.randomUUID(), nome: "", media: "" }
 ];
-const VALOR_KWH = 1.17;
-
 const state = {
     geracaoTotal: "",
+    valorKWh: "1,17",
     unidades: initialUnits
 };
 
 const elements = {
     geracaoTotal: document.querySelector("#geracaoTotal"),
+    valorKWh: document.querySelector("#valorKWh"),
     adicionarUnidade: document.querySelector("#adicionarUnidade"),
     totalUnidades: document.querySelector("#totalUnidades"),
     totalDistribuido: document.querySelector("#totalDistribuido"),
@@ -59,6 +59,11 @@ function unidadesCalculadas() {
     }));
 }
 
+function valorKWhAtual() {
+    const valor = parseNumero(state.valorKWh);
+    return valor > 0 ? valor : 1.17;
+}
+
 function calcularPercentuais(unidades) {
     const somaMedias = unidades.reduce((acc, unidade) => acc + unidade.media, 0);
     return unidades.map((unidade) => (somaMedias > 0 ? unidade.media / somaMedias : 0));
@@ -71,6 +76,7 @@ function calcularPercentuaisSobreGeracaoTotal(unidades, geracaoTotal) {
 function distribuirEnergia(unidades, geracaoTotal) {
     const percentuais = calcularPercentuais(unidades);
     const percentuaisSobreGeracaoTotal = calcularPercentuaisSobreGeracaoTotal(unidades, geracaoTotal);
+    const valorKWh = valorKWhAtual();
 
     return unidades.map((unidade, index) => ({
         id: unidade.id,
@@ -79,7 +85,7 @@ function distribuirEnergia(unidades, geracaoTotal) {
         percentual: percentuais[index],
         percentualGeracaoTotal: percentuaisSobreGeracaoTotal[index],
         energia: percentuais[index] * geracaoTotal,
-        valorFatura: percentuais[index] * geracaoTotal * VALOR_KWH
+        valorFatura: percentuais[index] * geracaoTotal * valorKWh
     }));
 }
 
@@ -191,6 +197,7 @@ function render() {
     const distribuicao = distribuirEnergia(unidades, geracaoTotal);
 
     elements.geracaoTotal.value = state.geracaoTotal;
+    elements.valorKWh.value = state.valorKWh;
 
     renderResumo(distribuicao);
     renderLista(distribuicao);
@@ -204,6 +211,14 @@ function restoreActiveField() {
         elements.geracaoTotal.focus();
         if (typeof activeField.start === "number" && typeof activeField.end === "number") {
             elements.geracaoTotal.setSelectionRange(activeField.start, activeField.end);
+        }
+        return;
+    }
+
+    if (activeField.id === "valor-kwh") {
+        elements.valorKWh.focus();
+        if (typeof activeField.start === "number" && typeof activeField.end === "number") {
+            elements.valorKWh.setSelectionRange(activeField.start, activeField.end);
         }
         return;
     }
@@ -233,6 +248,17 @@ elements.geracaoTotal.addEventListener("input", (event) => {
     activeField = {
         id: "geracao-total",
         role: "geracaoTotal",
+        start: event.target.selectionStart,
+        end: event.target.selectionEnd
+    };
+    render();
+});
+
+elements.valorKWh.addEventListener("input", (event) => {
+    state.valorKWh = event.target.value;
+    activeField = {
+        id: "valor-kwh",
+        role: "valorKWh",
         start: event.target.selectionStart,
         end: event.target.selectionEnd
     };

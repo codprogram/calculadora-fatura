@@ -30,11 +30,11 @@ private struct UnidadeEditavel: Identifiable {
 }
 
 struct ContentView: View {
-    private let valorKWh = 1.17
     @State private var unidades: [UnidadeEditavel] = [
         UnidadeEditavel(nome: "", mediaTexto: "")
     ]
     @State private var geracaoTotalTexto = ""
+    @State private var valorKWhTexto = "1,17"
     private let corTitulo = Color(red: 0.09, green: 0.15, blue: 0.22)
     private let corTexto = Color(red: 0.18, green: 0.24, blue: 0.31)
     private let corSecundaria = Color(red: 0.38, green: 0.46, blue: 0.56)
@@ -46,6 +46,11 @@ struct ContentView: View {
 
     var geracaoTotal: Double {
         parseNumero(geracaoTotalTexto)
+    }
+
+    var valorKWh: Double {
+        let valor = parseNumero(valorKWhTexto)
+        return valor > 0 ? valor : 1.17
     }
 
     var percentuais: [Double] {
@@ -141,6 +146,23 @@ struct ContentView: View {
                         .foregroundStyle(corSecundaria)
 
                     TextField("0", text: $geracaoTotalTexto)
+                        .textFieldStyle(.plain)
+                        .font(.system(size: 18, weight: .bold, design: .rounded))
+                        .foregroundStyle(corCampo)
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 10)
+                        .background(
+                            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                                .fill(Color.white.opacity(0.92))
+                        )
+                }
+
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("Valor do kWh (R$)")
+                        .font(.system(size: 12, weight: .semibold, design: .rounded))
+                        .foregroundStyle(corSecundaria)
+
+                    TextField("1,17", text: $valorKWhTexto)
                         .textFieldStyle(.plain)
                         .font(.system(size: 18, weight: .bold, design: .rounded))
                         .foregroundStyle(corCampo)

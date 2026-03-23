@@ -21,7 +21,12 @@
             <div class="hero-actions">
                 <label class="field">
                     <span>Geracao total (kWh)</span>
-                    <input id="geracaoTotal" type="text" inputmode="decimal" value="10000">
+                    <input id="geracaoTotal" type="text" inputmode="decimal" value="">
+                </label>
+
+                <label class="field">
+                    <span>Valor do kWh (R$)</span>
+                    <input id="valorKWh" type="text" inputmode="decimal" value="1,17">
                 </label>
 
                 <button id="adicionarUnidade" class="primary-button" type="button">Adicionar unidade</button>
@@ -63,7 +68,7 @@
             <section class="card panel result-panel">
                 <div class="panel-header">
                     <h2>Ranking do rateio</h2>
-                    <p>Distribuicao proporcional sobre o consumo medio total, com valor de referencia de R$ 1,17 por kWh.</p>
+                    <p>Distribuicao proporcional sobre o consumo medio total, com valor do kWh editavel.</p>
                 </div>
                 <div id="resultadoRateio" class="result-list"></div>
             </section>
