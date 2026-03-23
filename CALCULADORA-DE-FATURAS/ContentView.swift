@@ -60,6 +60,20 @@ struct ContentView: View {
         distribuirEnergia(unidades: unidadesCalculadas, geracaoTotal: geracaoTotal)
     }
 
+    var rankingRateio: [(nome: String, media: Double, percentual: Double, valorFatura: Double)] {
+        unidadesCalculadas.map { unidade in
+            let percentual = geracaoTotal > 0 ? unidade.media / geracaoTotal : 0
+            let valorFatura = unidade.media * valorKWh
+            return (
+                nome: unidade.nome,
+                media: unidade.media,
+                percentual: percentual,
+                valorFatura: valorFatura
+            )
+        }
+        .sorted { $0.percentual > $1.percentual }
+    }
+
     var somaMedias: Double {
         unidadesCalculadas.reduce(0) { $0 + $1.media }
     }
@@ -275,25 +289,25 @@ struct ContentView: View {
 
     private var painelResultado: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Resultado do Rateio")
+            Text("Ranking do Rateio")
                 .font(.system(size: 18, weight: .bold, design: .rounded))
                 .foregroundStyle(corTitulo)
 
-            ForEach(Array(distribuicao.enumerated()), id: \.offset) { index, item in
+            ForEach(Array(rankingRateio.enumerated()), id: \.offset) { index, item in
                 HStack {
                     VStack(alignment: .leading, spacing: 4) {
-                        Text(item.nome)
+                        Text("\(index + 1). \(item.nome)")
                             .font(.system(size: 15, weight: .bold, design: .rounded))
                             .foregroundStyle(corTitulo)
 
-                        Text("Percentual sobre a geracao: \(formatarPercentual(percentuaisSobreGeracaoTotal[index]))")
+                        Text("Media: \(formatarNumero(item.media)) kWh | Fatura estimada: \(formatarMoeda(item.valorFatura))")
                             .font(.system(size: 12, weight: .medium, design: .rounded))
                             .foregroundStyle(corSecundaria)
                     }
 
                     Spacer()
 
-                    Text(formatarPercentual(percentuaisSobreGeracaoTotal[index]))
+                    Text(formatarPercentual(item.percentual))
                         .font(.system(size: 16, weight: .bold, design: .rounded))
                         .foregroundStyle(Color(red: 0.13, green: 0.47, blue: 0.64))
                 }

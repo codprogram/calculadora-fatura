@@ -158,7 +158,9 @@ function renderResultado(distribuicao) {
         return;
     }
 
-    distribuicao.forEach((item) => {
+    const ranking = [...distribuicao].sort((a, b) => b.percentualGeracaoTotal - a.percentualGeracaoTotal);
+
+    ranking.forEach((item, index) => {
         const article = document.createElement("article");
         article.className = "result-item";
 
@@ -167,7 +169,7 @@ function renderResultado(distribuicao) {
 
         const nome = document.createElement("span");
         nome.className = "result-name";
-        nome.textContent = item.nome;
+        nome.textContent = `${index + 1}. ${item.nome}`;
 
         const energia = document.createElement("span");
         energia.className = "result-energy";
@@ -175,7 +177,7 @@ function renderResultado(distribuicao) {
 
         const meta = document.createElement("div");
         meta.className = "result-meta";
-        meta.textContent = `Consumo medio: ${formatarNumero(item.media)} kWh | Percentual sobre a geracao: ${formatarPercentual(item.percentualGeracaoTotal)} | Fatura estimada: ${formatarMoeda(item.valorFatura)}`;
+        meta.textContent = `Media: ${formatarNumero(item.media)} kWh | Fatura estimada: ${formatarMoeda(item.valorFatura)}`;
 
         top.append(nome, energia);
         article.append(top, meta);
