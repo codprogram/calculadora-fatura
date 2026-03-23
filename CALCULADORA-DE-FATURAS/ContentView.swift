@@ -56,10 +56,6 @@ struct ContentView: View {
         distribuirEnergia(unidades: unidadesCalculadas, geracaoTotal: geracaoTotal)
     }
 
-    var energiaRateada: Double {
-        min(geracaoTotal, somaMedias)
-    }
-
     var somaMedias: Double {
         unidadesCalculadas.reduce(0) { $0 + $1.media }
     }
@@ -69,12 +65,12 @@ struct ContentView: View {
     }
 
     var energiaFaltante: Double {
-        max(somaMedias - somaDistribuida, 0)
+        max(geracaoTotal - somaDistribuida, 0)
     }
 
     var percentualDistribuido: Double {
-        guard somaMedias > 0 else { return 0 }
-        return somaDistribuida / somaMedias
+        guard geracaoTotal > 0 else { return 0 }
+        return somaDistribuida / geracaoTotal
     }
 
     var percentualFaltante: Double {
@@ -332,11 +328,9 @@ struct ContentView: View {
 
     private func distribuirEnergia(unidades: [Unidade], geracaoTotal: Double) -> [(nome: String, energia: Double)] {
         let percentuais = calcularPercentuais(unidades: unidades)
-        let somaMedias = unidades.reduce(0) { $0 + $1.media }
-        let energiaRateada = min(geracaoTotal, somaMedias)
 
         return unidades.enumerated().map { index, unidade in
-            (nome: unidade.nome, energia: percentuais[index] * energiaRateada)
+            (nome: unidade.nome, energia: percentuais[index] * geracaoTotal)
         }
     }
 
@@ -380,5 +374,5 @@ struct ContentView: View {
 
 #Preview {
     ContentView()
-        .frame(width: 1100, height: 550)
+        .frame(width: 1100, height: 350)
 }

@@ -67,24 +67,23 @@ function calcularPercentuais(unidades) {
 
 function distribuirEnergia(unidades, geracaoTotal) {
     const percentuais = calcularPercentuais(unidades);
-    const somaMedias = unidades.reduce((acc, unidade) => acc + unidade.media, 0);
-    const energiaRateada = Math.min(geracaoTotal, somaMedias);
 
     return unidades.map((unidade, index) => ({
         id: unidade.id,
         nome: unidade.nome,
         media: unidade.media,
         percentual: percentuais[index],
-        energia: percentuais[index] * energiaRateada,
-        valorFatura: percentuais[index] * energiaRateada * VALOR_KWH
+        energia: percentuais[index] * geracaoTotal,
+        valorFatura: percentuais[index] * geracaoTotal * VALOR_KWH
     }));
 }
 
 function renderResumo(distribuicao) {
     const somaMedias = distribuicao.reduce((acc, item) => acc + item.media, 0);
     const totalDistribuido = distribuicao.reduce((acc, item) => acc + item.energia, 0);
-    const energiaFaltante = Math.max(somaMedias - totalDistribuido, 0);
-    const percentualDistribuido = somaMedias > 0 ? totalDistribuido / somaMedias : 0;
+    const geracaoTotal = parseNumero(state.geracaoTotal);
+    const energiaFaltante = Math.max(geracaoTotal - totalDistribuido, 0);
+    const percentualDistribuido = geracaoTotal > 0 ? totalDistribuido / geracaoTotal : 0;
     const percentualFaltante = Math.max(1 - percentualDistribuido, 0);
 
     elements.totalUnidades.textContent = String(distribuicao.length);
