@@ -56,12 +56,29 @@ struct ContentView: View {
         distribuirEnergia(unidades: unidadesCalculadas, geracaoTotal: geracaoTotal)
     }
 
+    var energiaRateada: Double {
+        min(geracaoTotal, somaMedias)
+    }
+
     var somaMedias: Double {
         unidadesCalculadas.reduce(0) { $0 + $1.media }
     }
 
     var somaDistribuida: Double {
         distribuicao.reduce(0) { $0 + $1.energia }
+    }
+
+    var energiaFaltante: Double {
+        max(somaMedias - somaDistribuida, 0)
+    }
+
+    var percentualDistribuido: Double {
+        guard somaMedias > 0 else { return 0 }
+        return somaDistribuida / somaMedias
+    }
+
+    var percentualFaltante: Double {
+        max(1 - percentualDistribuido, 0)
     }
 
     var body: some View {
@@ -143,8 +160,11 @@ struct ContentView: View {
     private var resumo: some View {
         HStack(spacing: 12) {
             resumoCard(titulo: "Unidades", valor: "\(unidades.count)", cor: Color(red: 0.19, green: 0.42, blue: 0.54))
-            resumoCard(titulo: "Soma das Medias", valor: formatarNumero(somaMedias), cor: Color(red: 0.16, green: 0.52, blue: 0.39))
-            resumoCard(titulo: "Total Distribuido", valor: formatarNumero(somaDistribuida), cor: Color(red: 0.70, green: 0.46, blue: 0.18))
+            resumoCard(titulo: "Soma das Medias (kWh)", valor: "\(formatarNumero(somaMedias)) kWh", cor: Color(red: 0.16, green: 0.52, blue: 0.39))
+            resumoCard(titulo: "Distribuido (kWh)", valor: "\(formatarNumero(somaDistribuida)) kWh", cor: Color(red: 0.70, green: 0.46, blue: 0.18))
+            resumoCard(titulo: "Faltante (kWh)", valor: "\(formatarNumero(energiaFaltante)) kWh", cor: Color(red: 0.68, green: 0.39, blue: 0.12))
+            resumoCard(titulo: "% Distribuido", valor: formatarPercentual(percentualDistribuido), cor: Color(red: 0.11, green: 0.47, blue: 0.38))
+            resumoCard(titulo: "% Faltante", valor: formatarPercentual(percentualFaltante), cor: Color(red: 0.62, green: 0.28, blue: 0.18))
         }
     }
 
@@ -312,14 +332,26 @@ struct ContentView: View {
 
     private func distribuirEnergia(unidades: [Unidade], geracaoTotal: Double) -> [(nome: String, energia: Double)] {
         let percentuais = calcularPercentuais(unidades: unidades)
+        let somaMedias = unidades.reduce(0) { $0 + $1.media }
+        let energiaRateada = min(geracaoTotal, somaMedias)
 
         return unidades.enumerated().map { index, unidade in
-            (nome: unidade.nome, energia: percentuais[index] * geracaoTotal)
+            (nome: unidade.nome, energia: percentuais[index] * energiaRateada)
         }
     }
 
     private func parseNumero(_ texto: String) -> Double {
-        let textoNormalizado = texto.replacingOccurrences(of: ",", with: ".")
+        let textoBruto = texto.replacingOccurrences(of: " ", with: "")
+        let textoNormalizado: String
+
+        if textoBruto.contains(",") {
+            textoNormalizado = textoBruto
+                .replacingOccurrences(of: ".", with: "")
+                .replacingOccurrences(of: ",", with: ".")
+        } else {
+            textoNormalizado = textoBruto
+        }
+
         return Double(textoNormalizado) ?? 0
     }
 
@@ -348,5 +380,5 @@ struct ContentView: View {
 
 #Preview {
     ContentView()
-        .frame(width: 850, height: 900)
+        .frame(width: 1100, height: 550)
 }
