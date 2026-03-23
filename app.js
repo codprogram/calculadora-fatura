@@ -1,12 +1,10 @@
 const initialUnits = [
-    { id: crypto.randomUUID(), nome: "Geradora", media: "120" },
-    { id: crypto.randomUUID(), nome: "Beneficiaria 1", media: "90" },
-    { id: crypto.randomUUID(), nome: "Beneficiaria 2", media: "75" }
+    { id: crypto.randomUUID(), nome: "", media: "" }
 ];
 const VALOR_KWH = 1.17;
 
 const state = {
-    geracaoTotal: "10000",
+    geracaoTotal: "",
     unidades: initialUnits
 };
 
@@ -242,8 +240,8 @@ elements.geracaoTotal.addEventListener("input", (event) => {
 elements.adicionarUnidade.addEventListener("click", () => {
     state.unidades.push({
         id: crypto.randomUUID(),
-        nome: "Nova unidade",
-        media: "0"
+        nome: "",
+        media: ""
     });
     render();
 });

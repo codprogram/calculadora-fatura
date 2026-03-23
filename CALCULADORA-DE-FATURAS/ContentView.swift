@@ -31,20 +31,9 @@ private struct UnidadeEditavel: Identifiable {
 
 struct ContentView: View {
     @State private var unidades: [UnidadeEditavel] = [
-        UnidadeEditavel(
-            nome: "Geradora",
-            mediaTexto: "120"
-        ),
-        UnidadeEditavel(
-            nome: "Beneficiaria 1",
-            mediaTexto: "90"
-        ),
-        UnidadeEditavel(
-            nome: "Beneficiaria 2",
-            mediaTexto: "75"
-        )
+        UnidadeEditavel(nome: "", mediaTexto: "")
     ]
-    @State private var geracaoTotalTexto = "10000"
+    @State private var geracaoTotalTexto = ""
     private let corTitulo = Color(red: 0.09, green: 0.15, blue: 0.22)
     private let corTexto = Color(red: 0.18, green: 0.24, blue: 0.31)
     private let corSecundaria = Color(red: 0.38, green: 0.46, blue: 0.56)
@@ -302,7 +291,7 @@ struct ContentView: View {
     }
 
     private func adicionarUnidade() {
-        unidades.append(UnidadeEditavel(nome: "Nova unidade", mediaTexto: "0"))
+        unidades.append(UnidadeEditavel(nome: "", mediaTexto: ""))
     }
 
     private func excluirUnidade(at index: Int) {
@@ -349,5 +338,5 @@ struct ContentView: View {
 
 #Preview {
     ContentView()
-        .frame(width: 1200, height: 900)
+        .frame(width: 850, height: 900)
 }
