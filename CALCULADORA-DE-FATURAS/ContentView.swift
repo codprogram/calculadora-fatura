@@ -52,6 +52,10 @@ struct ContentView: View {
         calcularPercentuais(unidades: unidadesCalculadas)
     }
 
+    var percentuaisSobreGeracaoTotal: [Double] {
+        calcularPercentuaisSobreGeracaoTotal(unidades: unidadesCalculadas, geracaoTotal: geracaoTotal)
+    }
+
     var distribuicao: [(nome: String, energia: Double)] {
         distribuirEnergia(unidades: unidadesCalculadas, geracaoTotal: geracaoTotal)
     }
@@ -192,7 +196,7 @@ struct ContentView: View {
 
     private func unidadeCard(index: Int) -> some View {
         let unidade = unidadesCalculadas[index]
-        let percentual = percentuais.indices.contains(index) ? percentuais[index] : 0
+        let percentual = percentuaisSobreGeracaoTotal.indices.contains(index) ? percentuaisSobreGeracaoTotal[index] : 0
         let energia = distribuicao.indices.contains(index) ? distribuicao[index].energia : 0
         let valorFatura = energia * valorKWh
 
@@ -322,6 +326,13 @@ struct ContentView: View {
         return unidades.map { unidade in
             guard somaMedias > 0 else { return 0 }
             return unidade.media / somaMedias
+        }
+    }
+
+    private func calcularPercentuaisSobreGeracaoTotal(unidades: [Unidade], geracaoTotal: Double) -> [Double] {
+        unidades.map { unidade in
+            guard geracaoTotal > 0 else { return 0 }
+            return unidade.media / geracaoTotal
         }
     }
 

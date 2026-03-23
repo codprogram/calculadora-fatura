@@ -64,14 +64,20 @@ function calcularPercentuais(unidades) {
     return unidades.map((unidade) => (somaMedias > 0 ? unidade.media / somaMedias : 0));
 }
 
+function calcularPercentuaisSobreGeracaoTotal(unidades, geracaoTotal) {
+    return unidades.map((unidade) => (geracaoTotal > 0 ? unidade.media / geracaoTotal : 0));
+}
+
 function distribuirEnergia(unidades, geracaoTotal) {
     const percentuais = calcularPercentuais(unidades);
+    const percentuaisSobreGeracaoTotal = calcularPercentuaisSobreGeracaoTotal(unidades, geracaoTotal);
 
     return unidades.map((unidade, index) => ({
         id: unidade.id,
         nome: unidade.nome,
         media: unidade.media,
         percentual: percentuais[index],
+        percentualGeracaoTotal: percentuaisSobreGeracaoTotal[index],
         energia: percentuais[index] * geracaoTotal,
         valorFatura: percentuais[index] * geracaoTotal * VALOR_KWH
     }));
@@ -107,7 +113,7 @@ function renderLista(distribuicao) {
         mediaInput.value = original.media;
 
         fragment.querySelector('[data-role="metric-media"]').textContent = `${formatarNumero(item.media)} kWh`;
-        fragment.querySelector('[data-role="metric-percentual"]').textContent = formatarPercentual(item.percentual);
+        fragment.querySelector('[data-role="metric-percentual"]').textContent = formatarPercentual(item.percentualGeracaoTotal);
         fragment.querySelector('[data-role="metric-energia"]').textContent = formatarMoeda(item.valorFatura);
 
         nomeInput.addEventListener("input", (event) => {
