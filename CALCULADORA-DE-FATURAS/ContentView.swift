@@ -61,7 +61,7 @@ struct ContentView: View {
     }
 
     var somaDistribuida: Double {
-        distribuicao.reduce(0) { $0 + $1.energia }
+        somaMedias
     }
 
     var energiaFaltante: Double {
@@ -156,7 +156,6 @@ struct ContentView: View {
     private var resumo: some View {
         HStack(spacing: 12) {
             resumoCard(titulo: "Unidades", valor: "\(unidades.count)", cor: Color(red: 0.19, green: 0.42, blue: 0.54))
-            resumoCard(titulo: "Soma das Medias (kWh)", valor: "\(formatarNumero(somaMedias)) kWh", cor: Color(red: 0.16, green: 0.52, blue: 0.39))
             resumoCard(titulo: "Distribuido (kWh)", valor: "\(formatarNumero(somaDistribuida)) kWh", cor: Color(red: 0.70, green: 0.46, blue: 0.18))
             resumoCard(titulo: "Faltante (kWh)", valor: "\(formatarNumero(energiaFaltante)) kWh", cor: Color(red: 0.68, green: 0.39, blue: 0.12))
             resumoCard(titulo: "% Distribuido", valor: formatarPercentual(percentualDistribuido), cor: Color(red: 0.11, green: 0.47, blue: 0.38))
@@ -374,5 +373,5 @@ struct ContentView: View {
 
 #Preview {
     ContentView()
-        .frame(width: 1100, height: 350)
+        .frame(width: 850, height: 350)
 }

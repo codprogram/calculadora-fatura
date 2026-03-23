@@ -12,7 +12,6 @@ const elements = {
     geracaoTotal: document.querySelector("#geracaoTotal"),
     adicionarUnidade: document.querySelector("#adicionarUnidade"),
     totalUnidades: document.querySelector("#totalUnidades"),
-    somaMedias: document.querySelector("#somaMedias"),
     totalDistribuido: document.querySelector("#totalDistribuido"),
     energiaFaltante: document.querySelector("#energiaFaltante"),
     percentualDistribuido: document.querySelector("#percentualDistribuido"),
@@ -80,14 +79,13 @@ function distribuirEnergia(unidades, geracaoTotal) {
 
 function renderResumo(distribuicao) {
     const somaMedias = distribuicao.reduce((acc, item) => acc + item.media, 0);
-    const totalDistribuido = distribuicao.reduce((acc, item) => acc + item.energia, 0);
+    const totalDistribuido = somaMedias;
     const geracaoTotal = parseNumero(state.geracaoTotal);
     const energiaFaltante = Math.max(geracaoTotal - totalDistribuido, 0);
     const percentualDistribuido = geracaoTotal > 0 ? totalDistribuido / geracaoTotal : 0;
     const percentualFaltante = Math.max(1 - percentualDistribuido, 0);
 
     elements.totalUnidades.textContent = String(distribuicao.length);
-    elements.somaMedias.textContent = formatarNumero(somaMedias);
     elements.totalDistribuido.textContent = formatarNumero(totalDistribuido);
     elements.energiaFaltante.textContent = formatarNumero(energiaFaltante);
     elements.percentualDistribuido.textContent = formatarPercentual(percentualDistribuido);
