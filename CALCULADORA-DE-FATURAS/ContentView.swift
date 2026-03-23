@@ -286,14 +286,14 @@ struct ContentView: View {
                             .font(.system(size: 15, weight: .bold, design: .rounded))
                             .foregroundStyle(corTitulo)
 
-                        Text("Percentual: \(formatarPercentual(percentuais[index]))")
+                        Text("Percentual sobre a geracao: \(formatarPercentual(percentuaisSobreGeracaoTotal[index]))")
                             .font(.system(size: 12, weight: .medium, design: .rounded))
                             .foregroundStyle(corSecundaria)
                     }
 
                     Spacer()
 
-                    Text("\(formatarNumero(item.energia)) kWh")
+                    Text(formatarPercentual(percentuaisSobreGeracaoTotal[index]))
                         .font(.system(size: 16, weight: .bold, design: .rounded))
                         .foregroundStyle(Color(red: 0.13, green: 0.47, blue: 0.64))
                 }

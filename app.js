@@ -171,11 +171,11 @@ function renderResultado(distribuicao) {
 
         const energia = document.createElement("span");
         energia.className = "result-energy";
-        energia.textContent = `${formatarNumero(item.energia)} kWh`;
+        energia.textContent = formatarPercentual(item.percentualGeracaoTotal);
 
         const meta = document.createElement("div");
         meta.className = "result-meta";
-        meta.textContent = `Consumo medio: ${formatarNumero(item.media)} kWh | Percentual: ${formatarPercentual(item.percentual)} | Fatura estimada: ${formatarMoeda(item.valorFatura)}`;
+        meta.textContent = `Consumo medio: ${formatarNumero(item.media)} kWh | Percentual sobre a geracao: ${formatarPercentual(item.percentualGeracaoTotal)} | Fatura estimada: ${formatarMoeda(item.valorFatura)}`;
 
         top.append(nome, energia);
         article.append(top, meta);
