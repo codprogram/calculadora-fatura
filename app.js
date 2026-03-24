@@ -7,6 +7,7 @@ const state = {
     buscaCliente: "",
     clienteSelecionadoId: null,
     clientesSalvos: [],
+    modoPersistencia: "local",
     geracaoTotal: "",
     valorKWh: "1,17",
     nomeCliente: "",
@@ -24,6 +25,7 @@ const elements = {
     salvarCliente: document.querySelector("#salvarCliente"),
     novoCliente: document.querySelector("#novoCliente"),
     listaClientes: document.querySelector("#listaClientes"),
+    modoPersistencia: document.querySelector("#modoPersistencia"),
     nomeCliente: document.querySelector("#nomeCliente"),
     codigoCliente: document.querySelector("#codigoCliente"),
     enderecoUnidade: document.querySelector("#enderecoUnidade"),
@@ -94,6 +96,25 @@ function uid() {
     return crypto.randomUUID();
 }
 
+async function apiRequest(path, options = {}) {
+    const response = await fetch(path, {
+        headers: {
+            "Content-Type": "application/json",
+            ...(options.headers || {})
+        },
+        ...options
+    });
+
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) {
+        const error = new Error(data.message || "Falha na API");
+        error.status = response.status;
+        throw error;
+    }
+
+    return data;
+}
+
 function carregarClientesSalvos() {
     try {
         const bruto = localStorage.getItem(STORAGE_KEY);
@@ -105,6 +126,14 @@ function carregarClientesSalvos() {
 
 function persistirClientesSalvos() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state.clientesSalvos));
+}
+
+async function sincronizarClientesRemotos() {
+    const query = state.buscaCliente.trim();
+    const suffix = query ? `?q=${encodeURIComponent(query)}` : "";
+    const data = await apiRequest(`/api/clients${suffix}`);
+    state.clientesSalvos = data.clients || [];
+    state.modoPersistencia = "remote";
 }
 
 function unidadesCalculadas() {
@@ -336,6 +365,28 @@ function salvarClienteAtual() {
     render();
 }
 
+async function salvarClienteAtualRemoto() {
+    const distribuicao = distribuirEnergia(unidadesCalculadas(), parseNumero(state.geracaoTotal));
+    const snapshot = snapshotAtual(distribuicao);
+
+    if (!snapshot.nomeCliente) {
+        alert("Informe o nome do cliente antes de salvar.");
+        return;
+    }
+
+    const data = await apiRequest("/api/clients", {
+        method: "POST",
+        body: JSON.stringify({
+            clientId: state.clienteSelecionadoId,
+            snapshot
+        })
+    });
+
+    state.clienteSelecionadoId = data.client.id;
+    await sincronizarClientesRemotos();
+    render();
+}
+
 function novoCliente() {
     state.clienteSelecionadoId = null;
     state.buscaCliente = "";
@@ -352,6 +403,9 @@ function novoCliente() {
 function renderClientesSalvos() {
     if (!elements.listaClientes || !elements.buscaCliente) return;
     elements.buscaCliente.value = state.buscaCliente;
+    if (elements.modoPersistencia) {
+        elements.modoPersistencia.textContent = state.modoPersistencia === "remote" ? "Modo banco sincronizado" : "Modo local";
+    }
     elements.listaClientes.innerHTML = "";
 
     const lista = clientesFiltrados().slice(0, 8);
@@ -366,7 +420,7 @@ function renderClientesSalvos() {
         item.innerHTML = `
             <div class="saved-client-meta">
                 <strong>${cliente.nomeCliente}</strong>
-                <span>Codigo: ${cliente.codigoCliente || "-"} | Relatorios: ${(cliente.historico || []).length}</span>
+                <span>Codigo: ${cliente.codigoCliente || "-"} | Relatorios: ${(cliente.historico || []).length} | ${state.modoPersistencia === "remote" ? "Banco real" : "Local"}</span>
             </div>
             <button type="button">Selecionar</button>
         `;
@@ -592,12 +646,31 @@ elements.vencimentoFatura.addEventListener("input", (event) => {
 if (elements.buscaCliente) {
     elements.buscaCliente.addEventListener("input", (event) => {
         state.buscaCliente = event.target.value;
+        if (state.modoPersistencia === "remote") {
+            sincronizarClientesRemotos()
+                .then(() => render())
+                .catch(() => {
+                    state.modoPersistencia = "local";
+                    carregarClientesSalvos();
+                    render();
+                });
+            return;
+        }
+
         renderClientesSalvos();
     });
 }
 
 if (elements.salvarCliente) {
     elements.salvarCliente.addEventListener("click", () => {
+        if (state.modoPersistencia === "remote") {
+            salvarClienteAtualRemoto().catch(() => {
+                state.modoPersistencia = "local";
+                salvarClienteAtual();
+            });
+            return;
+        }
+
         salvarClienteAtual();
     });
 }
@@ -628,5 +701,17 @@ elements.adicionarUnidade.addEventListener("click", () => {
     render();
 });
 
-carregarClientesSalvos();
-render();
+async function inicializarPersistencia() {
+    carregarClientesSalvos();
+    render();
+
+    try {
+        await sincronizarClientesRemotos();
+        render();
+    } catch {
+        state.modoPersistencia = "local";
+        render();
+    }
+}
+
+inicializarPersistencia();
