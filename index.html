@@ -60,6 +60,7 @@
         <section class="tab-bar">
             <button class="tab-button is-active" data-tab-button="calculadora" type="button">Calculadora</button>
             <button class="tab-button" data-tab-button="relatorio" type="button">Cliente + Relatorio</button>
+            <button class="tab-button" data-tab-button="comercial" type="button">Relatorio Comercial</button>
         </section>
 
         <section class="card panel client-panel" data-tab-section="relatorio">
@@ -128,6 +129,62 @@
                 <p id="feedbackStatus">Informe a geracao total para validar a distribuicao.</p>
             </div>
             <div id="feedbackDetalhes" class="feedback-details"></div>
+        </section>
+
+        <section class="card panel commercial-panel" data-tab-section="comercial">
+            <div class="panel-header">
+                <h2>Relatorio comercial</h2>
+                <p id="commercialStatus">Informe consumo real e valor original da fatura para montar o relatorio comercial.</p>
+            </div>
+
+            <div class="client-grid">
+                <label class="field">
+                    <span>Consumo real (kWh)</span>
+                    <input id="consumoReal" type="text" inputmode="decimal" placeholder="Ex.: 1242">
+                </label>
+
+                <label class="field">
+                    <span>Valor original da fatura</span>
+                    <input id="valorOriginalFatura" type="text" inputmode="decimal" placeholder="Ex.: 1687,89">
+                </label>
+
+                <label class="field">
+                    <span>Concessionaria com creditos</span>
+                    <input id="valorConcessionariaComCreditos" type="text" inputmode="decimal" placeholder="Ex.: 539,35">
+                </label>
+
+                <label class="field">
+                    <span>Tarifa Sunprime por kWh</span>
+                    <input id="tarifaSunprime" type="text" inputmode="decimal" value="0,68891">
+                </label>
+            </div>
+
+            <div class="summary-grid commercial-grid">
+                <article class="summary-card card">
+                    <span class="summary-label">Sem creditos</span>
+                    <strong id="commercialSemCreditos" class="summary-value">R$ 0,00</strong>
+                </article>
+                <article class="summary-card card">
+                    <span class="summary-label">Concessionaria</span>
+                    <strong id="commercialConcessionaria" class="summary-value">R$ 0,00</strong>
+                </article>
+                <article class="summary-card card">
+                    <span class="summary-label">Paga Sunprime</span>
+                    <strong id="commercialSunprime" class="summary-value">R$ 0,00</strong>
+                </article>
+                <article class="summary-card card">
+                    <span class="summary-label">Economia</span>
+                    <strong id="commercialEconomia" class="summary-value">R$ 0,00</strong>
+                </article>
+                <article class="summary-card card">
+                    <span class="summary-label">Tarifa sem creditos</span>
+                    <strong id="commercialTarifaSemCreditos" class="summary-value">R$ 0,00/kWh</strong>
+                </article>
+                <article class="summary-card card">
+                    <span class="summary-label">Tarifa Sunprime</span>
+                    <strong id="commercialTarifaSunprime" class="summary-value">R$ 0,00/kWh</strong>
+                </article>
+            </div>
         </section>
 
         <section class="card report-shell" data-tab-section="relatorio">

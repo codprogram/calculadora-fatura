@@ -10,6 +10,10 @@ const state = {
     modoPersistencia: "local",
     geracaoTotal: "",
     valorKWh: "1,17",
+    consumoReal: "",
+    valorOriginalFatura: "",
+    valorConcessionariaComCreditos: "",
+    tarifaSunprime: "0,68891",
     nomeCliente: "",
     codigoCliente: "",
     enderecoUnidade: "",
@@ -21,6 +25,10 @@ const VALOR_KWH_SEM_CREDITOS = 1.36;
 const elements = {
     geracaoTotal: document.querySelector("#geracaoTotal"),
     valorKWh: document.querySelector("#valorKWh"),
+    consumoReal: document.querySelector("#consumoReal"),
+    valorOriginalFatura: document.querySelector("#valorOriginalFatura"),
+    valorConcessionariaComCreditos: document.querySelector("#valorConcessionariaComCreditos"),
+    tarifaSunprime: document.querySelector("#tarifaSunprime"),
     buscaCliente: document.querySelector("#buscaCliente"),
     salvarCliente: document.querySelector("#salvarCliente"),
     novoCliente: document.querySelector("#novoCliente"),
@@ -36,6 +44,13 @@ const elements = {
     energiaFaltante: document.querySelector("#energiaFaltante"),
     percentualDistribuido: document.querySelector("#percentualDistribuido"),
     percentualFaltante: document.querySelector("#percentualFaltante"),
+    commercialStatus: document.querySelector("#commercialStatus"),
+    commercialSemCreditos: document.querySelector("#commercialSemCreditos"),
+    commercialConcessionaria: document.querySelector("#commercialConcessionaria"),
+    commercialSunprime: document.querySelector("#commercialSunprime"),
+    commercialEconomia: document.querySelector("#commercialEconomia"),
+    commercialTarifaSemCreditos: document.querySelector("#commercialTarifaSemCreditos"),
+    commercialTarifaSunprime: document.querySelector("#commercialTarifaSunprime"),
     feedbackPanel: document.querySelector(".feedback-panel"),
     feedbackStatus: document.querySelector("#feedbackStatus"),
     feedbackDetalhes: document.querySelector("#feedbackDetalhes"),
@@ -147,6 +162,11 @@ function unidadesCalculadas() {
 function valorKWhAtual() {
     const valor = parseNumero(state.valorKWh);
     return valor > 0 ? valor : 1.17;
+}
+
+function tarifaSunprimeAtual() {
+    const valor = parseNumero(state.tarifaSunprime);
+    return valor > 0 ? valor : 0.68891;
 }
 
 function clientesFiltrados() {
@@ -299,6 +319,10 @@ function snapshotAtual(distribuicao) {
         vencimentoFatura: state.vencimentoFatura,
         geracaoTotal: state.geracaoTotal,
         valorKWh: state.valorKWh,
+        consumoReal: state.consumoReal,
+        valorOriginalFatura: state.valorOriginalFatura,
+        valorConcessionariaComCreditos: state.valorConcessionariaComCreditos,
+        tarifaSunprime: state.tarifaSunprime,
         unidades: state.unidades.map((unidade) => ({ ...unidade })),
         resumo: {
             valorComCreditos,
@@ -317,6 +341,10 @@ function preencherCliente(cliente) {
     state.vencimentoFatura = snapshot.vencimentoFatura || "";
     state.geracaoTotal = snapshot.geracaoTotal || "";
     state.valorKWh = snapshot.valorKWh || "1,17";
+    state.consumoReal = snapshot.consumoReal || "";
+    state.valorOriginalFatura = snapshot.valorOriginalFatura || "";
+    state.valorConcessionariaComCreditos = snapshot.valorConcessionariaComCreditos || "";
+    state.tarifaSunprime = snapshot.tarifaSunprime || "0,68891";
     state.unidades = snapshot.unidades?.length ? snapshot.unidades.map((unidade) => ({ ...unidade })) : [{ id: uid(), nome: "", media: "" }];
     render();
 }
@@ -396,6 +424,10 @@ function novoCliente() {
     state.vencimentoFatura = "";
     state.geracaoTotal = "";
     state.valorKWh = "1,17";
+    state.consumoReal = "";
+    state.valorOriginalFatura = "";
+    state.valorConcessionariaComCreditos = "";
+    state.tarifaSunprime = "0,68891";
     state.unidades = [{ id: uid(), nome: "", media: "" }];
     render();
 }
@@ -540,6 +572,37 @@ function renderTabs() {
     });
 }
 
+function renderCommercial() {
+    if (!elements.consumoReal) return;
+
+    const consumoReal = parseNumero(state.consumoReal);
+    const valorOriginal = parseNumero(state.valorOriginalFatura);
+    const valorConcessionaria = parseNumero(state.valorConcessionariaComCreditos);
+    const tarifaSunprime = tarifaSunprimeAtual();
+    const valorSunprime = consumoReal * tarifaSunprime;
+    const economia = Math.max(valorOriginal - (valorConcessionaria + valorSunprime), 0);
+    const tarifaSemCreditos = consumoReal > 0 ? valorOriginal / consumoReal : 0;
+
+    elements.consumoReal.value = state.consumoReal;
+    elements.valorOriginalFatura.value = state.valorOriginalFatura;
+    elements.valorConcessionariaComCreditos.value = state.valorConcessionariaComCreditos;
+    elements.tarifaSunprime.value = state.tarifaSunprime;
+    elements.commercialSemCreditos.textContent = formatarMoeda(valorOriginal);
+    elements.commercialConcessionaria.textContent = formatarMoeda(valorConcessionaria);
+    elements.commercialSunprime.textContent = formatarMoeda(valorSunprime);
+    elements.commercialEconomia.textContent = formatarMoeda(economia);
+    elements.commercialTarifaSemCreditos.textContent = `${formatarMoeda(tarifaSemCreditos)}/kWh`;
+    elements.commercialTarifaSunprime.textContent = `${formatarMoeda(tarifaSunprime)}/kWh`;
+
+    if (consumoReal <= 0 || valorOriginal <= 0) {
+        elements.commercialStatus.textContent = "Informe consumo real e valor original da fatura para montar o relatorio comercial.";
+    } else if (valorConcessionaria <= 0) {
+        elements.commercialStatus.textContent = "Informe o valor residual da concessionaria com creditos para concluir o comparativo.";
+    } else {
+        elements.commercialStatus.textContent = "Relatorio comercial pronto. Os valores ja refletem o cenario sem creditos, o residual na concessionaria e o valor devido a Sunprime.";
+    }
+}
+
 function render() {
     const geracaoTotal = parseNumero(state.geracaoTotal);
     const unidades = unidadesCalculadas();
@@ -559,6 +622,7 @@ function render() {
     renderResultado(distribuicao);
     renderFeedback(distribuicao);
     renderReport(distribuicao);
+    renderCommercial();
     renderTabs();
 }
 
@@ -622,6 +686,34 @@ elements.valorKWh.addEventListener("input", (event) => {
     };
     render();
 });
+
+if (elements.consumoReal) {
+    elements.consumoReal.addEventListener("input", (event) => {
+        state.consumoReal = event.target.value;
+        render();
+    });
+}
+
+if (elements.valorOriginalFatura) {
+    elements.valorOriginalFatura.addEventListener("input", (event) => {
+        state.valorOriginalFatura = event.target.value;
+        render();
+    });
+}
+
+if (elements.valorConcessionariaComCreditos) {
+    elements.valorConcessionariaComCreditos.addEventListener("input", (event) => {
+        state.valorConcessionariaComCreditos = event.target.value;
+        render();
+    });
+}
+
+if (elements.tarifaSunprime) {
+    elements.tarifaSunprime.addEventListener("input", (event) => {
+        state.tarifaSunprime = event.target.value;
+        render();
+    });
+}
 
 elements.nomeCliente.addEventListener("input", (event) => {
     state.nomeCliente = event.target.value;
