@@ -10,6 +10,7 @@ const state = {
     vencimentoFatura: "",
     unidades: initialUnits
 };
+const VALOR_KWH_SEM_CREDITOS = 1.36;
 
 const elements = {
     geracaoTotal: document.querySelector("#geracaoTotal"),
@@ -96,7 +97,8 @@ function distribuirEnergia(unidades, geracaoTotal) {
         percentual: percentuais[index],
         percentualGeracaoTotal: percentuaisSobreGeracaoTotal[index],
         energia: percentuais[index] * geracaoTotal,
-        valorFatura: percentuais[index] * geracaoTotal * valorKWh
+        valorComCreditos: percentuais[index] * geracaoTotal * valorKWh,
+        valorSemCreditos: percentuais[index] * geracaoTotal * VALOR_KWH_SEM_CREDITOS
     }));
 }
 
@@ -131,7 +133,8 @@ function renderLista(distribuicao) {
 
         fragment.querySelector('[data-role="metric-media"]').textContent = `${formatarNumero(item.media)} kWh`;
         fragment.querySelector('[data-role="metric-percentual"]').textContent = formatarPercentual(item.percentualGeracaoTotal);
-        fragment.querySelector('[data-role="metric-energia"]').textContent = formatarMoeda(item.valorFatura);
+        fragment.querySelector('[data-role="metric-com-creditos"]').textContent = formatarMoeda(item.valorComCreditos);
+        fragment.querySelector('[data-role="metric-sem-creditos"]').textContent = formatarMoeda(item.valorSemCreditos);
 
         nomeInput.addEventListener("input", (event) => {
             original.nome = event.target.value;
@@ -194,7 +197,7 @@ function renderResultado(distribuicao) {
 
         const meta = document.createElement("div");
         meta.className = "result-meta";
-        meta.textContent = `Media: ${formatarNumero(item.media)} kWh | Fatura estimada: ${formatarMoeda(item.valorFatura)}`;
+        meta.textContent = `Media: ${formatarNumero(item.media)} kWh | Com creditos: ${formatarMoeda(item.valorComCreditos)} | Sem creditos: ${formatarMoeda(item.valorSemCreditos)}`;
 
         top.append(nome, energia);
         article.append(top, meta);

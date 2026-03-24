@@ -30,6 +30,7 @@ private struct UnidadeEditavel: Identifiable {
 }
 
 struct ContentView: View {
+    private let valorKWhSemCreditos = 1.36
     @State private var unidades: [UnidadeEditavel] = [
         UnidadeEditavel(nome: "", mediaTexto: "")
     ]
@@ -69,15 +70,17 @@ struct ContentView: View {
         distribuirEnergia(unidades: unidadesCalculadas, geracaoTotal: geracaoTotal)
     }
 
-    var rankingRateio: [(nome: String, media: Double, percentual: Double, valorFatura: Double)] {
+    var rankingRateio: [(nome: String, media: Double, percentual: Double, valorComCreditos: Double, valorSemCreditos: Double)] {
         unidadesCalculadas.map { unidade in
             let percentual = geracaoTotal > 0 ? unidade.media / geracaoTotal : 0
-            let valorFatura = unidade.media * valorKWh
+            let valorComCreditos = unidade.media * valorKWh
+            let valorSemCreditos = unidade.media * valorKWhSemCreditos
             return (
                 nome: unidade.nome,
                 media: unidade.media,
                 percentual: percentual,
-                valorFatura: valorFatura
+                valorComCreditos: valorComCreditos,
+                valorSemCreditos: valorSemCreditos
             )
         }
         .sorted { $0.percentual > $1.percentual }
@@ -342,7 +345,8 @@ struct ContentView: View {
         let unidade = unidadesCalculadas[index]
         let percentual = percentuaisSobreGeracaoTotal.indices.contains(index) ? percentuaisSobreGeracaoTotal[index] : 0
         let energia = distribuicao.indices.contains(index) ? distribuicao[index].energia : 0
-        let valorFatura = energia * valorKWh
+        let valorComCreditos = energia * valorKWh
+        let valorSemCreditos = energia * valorKWhSemCreditos
 
         return VStack(alignment: .leading, spacing: 12) {
             HStack {
@@ -369,7 +373,8 @@ struct ContentView: View {
             HStack(spacing: 10) {
                 metricaCard(titulo: "Media (kWh)", valor: "\(formatarNumero(unidade.media)) kWh")
                 metricaCard(titulo: "Percentual", valor: formatarPercentual(percentual))
-                metricaCard(titulo: "Valor da fatura", valor: formatarMoeda(valorFatura))
+                metricaCard(titulo: "Com creditos", valor: formatarMoeda(valorComCreditos))
+                metricaCard(titulo: "Sem creditos", valor: formatarMoeda(valorSemCreditos))
             }
         }
         .padding(16)
@@ -430,7 +435,7 @@ struct ContentView: View {
                             .font(.system(size: 15, weight: .bold, design: .rounded))
                             .foregroundStyle(corTitulo)
 
-                        Text("Media: \(formatarNumero(item.media)) kWh | Fatura estimada: \(formatarMoeda(item.valorFatura))")
+                        Text("Media: \(formatarNumero(item.media)) kWh | Com creditos: \(formatarMoeda(item.valorComCreditos)) | Sem creditos: \(formatarMoeda(item.valorSemCreditos))")
                             .font(.system(size: 12, weight: .medium, design: .rounded))
                             .foregroundStyle(corSecundaria)
                     }
