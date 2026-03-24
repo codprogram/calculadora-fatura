@@ -40,6 +40,10 @@ struct ContentView: View {
     @State private var codigoCliente = ""
     @State private var enderecoUnidade = ""
     @State private var vencimentoFatura = Date()
+    @State private var consumoRealTexto = ""
+    @State private var valorOriginalFaturaTexto = ""
+    @State private var valorConcessionariaComCreditosTexto = ""
+    @State private var tarifaSunprimeTexto = "0,68891"
     @State private var modoTela: ModoTela = .calculadora
     private let corTitulo = Color(red: 0.09, green: 0.15, blue: 0.22)
     private let corTexto = Color(red: 0.18, green: 0.24, blue: 0.31)
@@ -57,6 +61,48 @@ struct ContentView: View {
     var valorKWh: Double {
         let valor = parseNumero(valorKWhTexto)
         return valor > 0 ? valor : 1.17
+    }
+
+    var consumoReal: Double {
+        parseNumero(consumoRealTexto)
+    }
+
+    var valorOriginalFatura: Double {
+        parseNumero(valorOriginalFaturaTexto)
+    }
+
+    var valorConcessionariaComCreditos: Double {
+        parseNumero(valorConcessionariaComCreditosTexto)
+    }
+
+    var tarifaSunprime: Double {
+        let valor = parseNumero(tarifaSunprimeTexto)
+        return valor > 0 ? valor : 0.68891
+    }
+
+    var valorPagarSunprime: Double {
+        consumoReal * tarifaSunprime
+    }
+
+    var economiaRelatorioComercial: Double {
+        max(valorOriginalFatura - (valorConcessionariaComCreditos + valorPagarSunprime), 0)
+    }
+
+    var tarifaSemCreditosEfetiva: Double {
+        guard consumoReal > 0 else { return valorKWhSemCreditos }
+        return valorOriginalFatura / consumoReal
+    }
+
+    var statusRelatorioComercial: String {
+        if consumoReal <= 0 || valorOriginalFatura <= 0 {
+            return "Informe consumo real e valor original da fatura para montar o relatorio comercial."
+        }
+
+        if valorConcessionariaComCreditos <= 0 {
+            return "Informe o valor residual da concessionaria com creditos para concluir o comparativo."
+        }
+
+        return "Relatorio comercial pronto. Os valores ja refletem o cenario sem creditos, o residual na concessionaria e o valor devido a Sunprime."
     }
 
     var percentuais: [Double] {
@@ -154,15 +200,23 @@ struct ContentView: View {
                 VStack(spacing: 16) {
                     cabecalho
                     seletorModo
-                    resumo
-                    if modoTela == .relatorio {
+                    if modoTela != .comercial {
+                        resumo
+                    }
+                    if modoTela == .relatorio || modoTela == .comercial {
                         dadosCliente
                     }
-                    listaUnidades
+                    if modoTela != .comercial {
+                        listaUnidades
+                    }
                     if modoTela == .relatorio {
                         painelResultado
                     }
-                    cardFeedback
+                    if modoTela == .comercial {
+                        painelRelatorioComercial
+                    } else {
+                        cardFeedback
+                    }
                 }
                 .padding(16)
             }
@@ -469,6 +523,43 @@ struct ContentView: View {
         .background(cardBackground)
     }
 
+    private var painelRelatorioComercial: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            Text("Relatorio Comercial")
+                .font(.system(size: 18, weight: .bold, design: .rounded))
+                .foregroundStyle(corTitulo)
+
+            Text(statusRelatorioComercial)
+                .font(.system(size: 12, weight: .semibold, design: .rounded))
+                .foregroundStyle(consumoReal > 0 && valorOriginalFatura > 0 ? Color(red: 0.11, green: 0.47, blue: 0.38) : Color(red: 0.68, green: 0.39, blue: 0.12))
+
+            HStack(spacing: 12) {
+                campoTexto(titulo: "Consumo real (kWh)", texto: $consumoRealTexto, placeholder: "Ex.: 1242")
+                campoTexto(titulo: "Valor original da fatura", texto: $valorOriginalFaturaTexto, placeholder: "Ex.: 1687,89")
+            }
+
+            HStack(spacing: 12) {
+                campoTexto(titulo: "Concessionaria com creditos", texto: $valorConcessionariaComCreditosTexto, placeholder: "Ex.: 539,35")
+                campoTexto(titulo: "Tarifa Sunprime por kWh", texto: $tarifaSunprimeTexto, placeholder: "Ex.: 0,68891")
+            }
+
+            HStack(spacing: 10) {
+                metricaCard(titulo: "Sem creditos", valor: formatarMoeda(valorOriginalFatura))
+                metricaCard(titulo: "Concessionaria", valor: formatarMoeda(valorConcessionariaComCreditos))
+                metricaCard(titulo: "Paga Sunprime", valor: formatarMoeda(valorPagarSunprime))
+                metricaCard(titulo: "Economia", valor: formatarMoeda(economiaRelatorioComercial))
+            }
+
+            HStack(spacing: 10) {
+                metricaCard(titulo: "Tarifa sem creditos", valor: "\(formatarMoeda(tarifaSemCreditosEfetiva))/kWh")
+                metricaCard(titulo: "Tarifa Sunprime", valor: "\(formatarMoeda(tarifaSunprime))/kWh")
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(16)
+        .background(cardBackground)
+    }
+
     private var cardFeedback: some View {
         VStack(alignment: .leading, spacing: 8) {
             Text("Feedback da distribuicao")
@@ -572,6 +663,7 @@ struct ContentView: View {
 private enum ModoTela: CaseIterable {
     case calculadora
     case relatorio
+    case comercial
 
     var titulo: String {
         switch self {
@@ -579,6 +671,8 @@ private enum ModoTela: CaseIterable {
             return "Calculadora"
         case .relatorio:
             return "Cliente + Relatorio"
+        case .comercial:
+            return "Relatorio Comercial"
         }
     }
 }
