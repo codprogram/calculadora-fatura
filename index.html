@@ -57,7 +57,12 @@
             </article>
         </section>
 
-        <section class="card panel client-panel">
+        <section class="tab-bar">
+            <button class="tab-button is-active" data-tab-button="calculadora" type="button">Calculadora</button>
+            <button class="tab-button" data-tab-button="relatorio" type="button">Cliente + Relatorio</button>
+        </section>
+
+        <section class="card panel client-panel" data-tab-section="relatorio">
             <div class="panel-header">
                 <h2>Dados do cliente</h2>
                 <p>Preencha as informacoes principais antes de cadastrar as unidades.</p>
@@ -95,7 +100,7 @@
                 <div id="listaUnidades" class="unit-list"></div>
             </section>
 
-            <section class="card panel result-panel">
+            <section class="card panel result-panel" data-tab-section="relatorio">
                 <div class="panel-header">
                     <h2>Ranking do rateio</h2>
                     <p>Distribuicao proporcional sobre o consumo medio total, com valor do kWh editavel.</p>
@@ -112,7 +117,7 @@
             <div id="feedbackDetalhes" class="feedback-details"></div>
         </section>
 
-        <section class="card report-shell">
+        <section class="card report-shell" data-tab-section="relatorio">
             <div class="report-brand">
                 <span class="report-mark">Sunprime Energy</span>
                 <span class="report-subtitle">Relatorio de Creditos de Energia</span>

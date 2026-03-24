@@ -2,6 +2,7 @@ const initialUnits = [
     { id: crypto.randomUUID(), nome: "", media: "" }
 ];
 const state = {
+    abaAtual: "calculadora",
     geracaoTotal: "",
     valorKWh: "1,17",
     nomeCliente: "",
@@ -29,6 +30,8 @@ const elements = {
     feedbackStatus: document.querySelector("#feedbackStatus"),
     feedbackDetalhes: document.querySelector("#feedbackDetalhes"),
     gerarPdf: document.querySelector("#gerarPdf"),
+    tabButtons: [...document.querySelectorAll("[data-tab-button]")],
+    tabSections: [...document.querySelectorAll("[data-tab-section]")],
     reportCliente: document.querySelector("#reportCliente"),
     reportCodigo: document.querySelector("#reportCodigo"),
     reportEndereco: document.querySelector("#reportEndereco"),
@@ -297,6 +300,16 @@ function renderReport(distribuicao) {
     });
 }
 
+function renderTabs() {
+    elements.tabButtons.forEach((button) => {
+        button.classList.toggle("is-active", button.dataset.tabButton === state.abaAtual);
+    });
+
+    elements.tabSections.forEach((section) => {
+        section.hidden = section.dataset.tabSection !== state.abaAtual;
+    });
+}
+
 function render() {
     const geracaoTotal = parseNumero(state.geracaoTotal);
     const unidades = unidadesCalculadas();
@@ -314,6 +327,7 @@ function render() {
     renderResultado(distribuicao);
     renderFeedback(distribuicao);
     renderReport(distribuicao);
+    renderTabs();
 }
 
 function restoreActiveField() {
@@ -396,6 +410,13 @@ elements.vencimentoFatura.addEventListener("input", (event) => {
 
 elements.gerarPdf.addEventListener("click", () => {
     window.print();
+});
+
+elements.tabButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+        state.abaAtual = button.dataset.tabButton;
+        render();
+    });
 });
 
 elements.adicionarUnidade.addEventListener("click", () => {

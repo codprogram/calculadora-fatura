@@ -40,6 +40,7 @@ struct ContentView: View {
     @State private var codigoCliente = ""
     @State private var enderecoUnidade = ""
     @State private var vencimentoFatura = Date()
+    @State private var modoTela: ModoTela = .calculadora
     private let corTitulo = Color(red: 0.09, green: 0.15, blue: 0.22)
     private let corTexto = Color(red: 0.18, green: 0.24, blue: 0.31)
     private let corSecundaria = Color(red: 0.38, green: 0.46, blue: 0.56)
@@ -152,10 +153,15 @@ struct ContentView: View {
             ScrollView {
                 VStack(spacing: 16) {
                     cabecalho
+                    seletorModo
                     resumo
-                    dadosCliente
+                    if modoTela == .relatorio {
+                        dadosCliente
+                    }
                     listaUnidades
-                    painelResultado
+                    if modoTela == .relatorio {
+                        painelResultado
+                    }
                     cardFeedback
                 }
                 .padding(16)
@@ -240,6 +246,15 @@ struct ContentView: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(18)
         .background(cardBackground)
+    }
+
+    private var seletorModo: some View {
+        Picker("Modo", selection: $modoTela) {
+            ForEach(ModoTela.allCases, id: \.self) { modo in
+                Text(modo.titulo).tag(modo)
+            }
+        }
+        .pickerStyle(.segmented)
     }
 
     private var resumo: some View {
@@ -551,6 +566,20 @@ struct ContentView: View {
         formatador.numberStyle = .currency
         formatador.currencyCode = "BRL"
         return formatador.string(from: NSNumber(value: valor)) ?? "R$ 0,00"
+    }
+}
+
+private enum ModoTela: CaseIterable {
+    case calculadora
+    case relatorio
+
+    var titulo: String {
+        switch self {
+        case .calculadora:
+            return "Calculadora"
+        case .relatorio:
+            return "Cliente + Relatorio"
+        }
     }
 }
 
