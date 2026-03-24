@@ -167,6 +167,10 @@ input {
     margin-top: 16px;
 }
 
+.feedback-panel {
+    margin-top: 16px;
+}
+
 .panel-header {
     margin-bottom: 18px;
 }
@@ -270,6 +274,36 @@ input {
 .result-meta {
     color: var(--muted);
     font-size: 0.95rem;
+}
+
+.feedback-details {
+    color: var(--muted);
+    font-size: 0.95rem;
+    font-weight: 600;
+}
+
+.feedback-panel.is-warning {
+    border-color: rgba(173, 114, 28, 0.28);
+}
+
+.feedback-panel.is-progress {
+    border-color: rgba(27, 110, 161, 0.28);
+}
+
+.feedback-panel.is-success {
+    border-color: rgba(13, 122, 87, 0.28);
+}
+
+.feedback-panel.is-warning #feedbackStatus {
+    color: #ad721c;
+}
+
+.feedback-panel.is-progress #feedbackStatus {
+    color: #1b6ea1;
+}
+
+.feedback-panel.is-success #feedbackStatus {
+    color: #0d7a57;
 }
 
 .empty-state {

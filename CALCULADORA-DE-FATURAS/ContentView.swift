@@ -104,6 +104,46 @@ struct ContentView: View {
         max(1 - percentualDistribuido, 0)
     }
 
+    var quantidadeUnidadesPreenchidas: Int {
+        unidadesCalculadas.filter { !$0.nome.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && $0.media > 0 }.count
+    }
+
+    var possuiGeracaoInformada: Bool {
+        geracaoTotal > 0
+    }
+
+    var statusFeedback: String {
+        if !possuiGeracaoInformada {
+            return "Informe a geracao total para validar a distribuicao."
+        }
+
+        if quantidadeUnidadesPreenchidas == 0 {
+            return "Cadastre ao menos uma unidade com nome e media para iniciar o rateio."
+        }
+
+        if energiaFaltante == 0 {
+            return "Distribuicao concluida. Toda a geracao informada ja foi coberta pelas medias cadastradas."
+        }
+
+        return "Distribuicao em andamento. Ainda faltam \(formatarNumero(energiaFaltante)) kWh para atingir 100% da geracao."
+    }
+
+    var detalhesFeedback: String {
+        "Unidades validas: \(quantidadeUnidadesPreenchidas) de \(unidades.count) | Distribuido: \(formatarPercentual(percentualDistribuido)) | Faltante: \(formatarPercentual(percentualFaltante))"
+    }
+
+    var corFeedback: Color {
+        if !possuiGeracaoInformada || quantidadeUnidadesPreenchidas == 0 {
+            return Color(red: 0.68, green: 0.39, blue: 0.12)
+        }
+
+        if energiaFaltante == 0 {
+            return Color(red: 0.11, green: 0.47, blue: 0.38)
+        }
+
+        return Color(red: 0.13, green: 0.47, blue: 0.64)
+    }
+
     var body: some View {
         NavigationStack {
             ScrollView {
@@ -113,6 +153,7 @@ struct ContentView: View {
                     dadosCliente
                     listaUnidades
                     painelResultado
+                    cardFeedback
                 }
                 .padding(16)
             }
@@ -406,6 +447,29 @@ struct ContentView: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(16)
         .background(cardBackground)
+    }
+
+    private var cardFeedback: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("Feedback da distribuicao")
+                .font(.system(size: 16, weight: .bold, design: .rounded))
+                .foregroundStyle(corTitulo)
+
+            Text(statusFeedback)
+                .font(.system(size: 13, weight: .semibold, design: .rounded))
+                .foregroundStyle(corFeedback)
+
+            Text(detalhesFeedback)
+                .font(.system(size: 12, weight: .medium, design: .rounded))
+                .foregroundStyle(corSecundaria)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(16)
+        .background(cardBackground)
+        .overlay(
+            RoundedRectangle(cornerRadius: 20, style: .continuous)
+                .stroke(corFeedback.opacity(0.18), lineWidth: 1.2)
+        )
     }
 
     private var cardBackground: some View {

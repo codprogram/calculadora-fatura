@@ -24,6 +24,9 @@ const elements = {
     energiaFaltante: document.querySelector("#energiaFaltante"),
     percentualDistribuido: document.querySelector("#percentualDistribuido"),
     percentualFaltante: document.querySelector("#percentualFaltante"),
+    feedbackPanel: document.querySelector(".feedback-panel"),
+    feedbackStatus: document.querySelector("#feedbackStatus"),
+    feedbackDetalhes: document.querySelector("#feedbackDetalhes"),
     listaUnidades: document.querySelector("#listaUnidades"),
     resultadoRateio: document.querySelector("#resultadoRateio"),
     unidadeTemplate: document.querySelector("#unidadeTemplate")
@@ -199,6 +202,33 @@ function renderResultado(distribuicao) {
     });
 }
 
+function renderFeedback(distribuicao) {
+    const unidadesValidas = state.unidades.filter((unidade) => unidade.nome.trim() && parseNumero(unidade.media) > 0).length;
+    const geracaoTotal = parseNumero(state.geracaoTotal);
+    const distribuido = distribuicao.reduce((acc, item) => acc + item.media, 0);
+    const faltante = Math.max(geracaoTotal - distribuido, 0);
+    const percentualDistribuido = geracaoTotal > 0 ? distribuido / geracaoTotal : 0;
+    const percentualFaltante = Math.max(1 - percentualDistribuido, 0);
+
+    let status = "Informe a geracao total para validar a distribuicao.";
+    let mode = "is-warning";
+
+    if (geracaoTotal > 0 && unidadesValidas === 0) {
+        status = "Cadastre ao menos uma unidade com nome e media para iniciar o rateio.";
+    } else if (geracaoTotal > 0 && faltante === 0) {
+        status = "Distribuicao concluida. Toda a geracao informada ja foi coberta pelas medias cadastradas.";
+        mode = "is-success";
+    } else if (geracaoTotal > 0) {
+        status = `Distribuicao em andamento. Ainda faltam ${formatarNumero(faltante)} kWh para atingir 100% da geracao.`;
+        mode = "is-progress";
+    }
+
+    elements.feedbackPanel.classList.remove("is-warning", "is-progress", "is-success");
+    elements.feedbackPanel.classList.add(mode);
+    elements.feedbackStatus.textContent = status;
+    elements.feedbackDetalhes.textContent = `Unidades validas: ${unidadesValidas} de ${state.unidades.length} | Distribuido: ${formatarPercentual(percentualDistribuido)} | Faltante: ${formatarPercentual(percentualFaltante)}`;
+}
+
 function render() {
     const geracaoTotal = parseNumero(state.geracaoTotal);
     const unidades = unidadesCalculadas();
@@ -214,6 +244,7 @@ function render() {
     renderResumo(distribuicao);
     renderLista(distribuicao);
     renderResultado(distribuicao);
+    renderFeedback(distribuicao);
 }
 
 function restoreActiveField() {
