@@ -35,6 +35,10 @@ struct ContentView: View {
     ]
     @State private var geracaoTotalTexto = ""
     @State private var valorKWhTexto = "1,17"
+    @State private var nomeCliente = ""
+    @State private var codigoCliente = ""
+    @State private var enderecoUnidade = ""
+    @State private var vencimentoFatura = Date()
     private let corTitulo = Color(red: 0.09, green: 0.15, blue: 0.22)
     private let corTexto = Color(red: 0.18, green: 0.24, blue: 0.31)
     private let corSecundaria = Color(red: 0.38, green: 0.46, blue: 0.56)
@@ -106,6 +110,7 @@ struct ContentView: View {
                 VStack(spacing: 16) {
                     cabecalho
                     resumo
+                    dadosCliente
                     listaUnidades
                     painelResultado
                 }
@@ -203,6 +208,48 @@ struct ContentView: View {
         }
     }
 
+    private var dadosCliente: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Dados do Cliente")
+                .font(.system(size: 18, weight: .bold, design: .rounded))
+                .foregroundStyle(corTitulo)
+
+            VStack(spacing: 10) {
+                HStack(spacing: 12) {
+                    campoTexto(titulo: "Nome do cliente", texto: $nomeCliente, placeholder: "Digite o nome")
+                    campoTexto(titulo: "Codigo do cliente", texto: $codigoCliente, placeholder: "Digite o codigo")
+                }
+
+                HStack(spacing: 12) {
+                    campoTexto(titulo: "Endereco da unidade consumidora", texto: $enderecoUnidade, placeholder: "Digite o endereco")
+
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text("Vencimento da fatura")
+                            .font(.system(size: 12, weight: .semibold, design: .rounded))
+                            .foregroundStyle(corSecundaria)
+
+                        DatePicker(
+                            "",
+                            selection: $vencimentoFatura,
+                            displayedComponents: .date
+                        )
+                        .labelsHidden()
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 10)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .background(
+                            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                                .fill(Color.white.opacity(0.92))
+                        )
+                    }
+                }
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(18)
+        .background(cardBackground)
+    }
+
     private func resumoCard(titulo: String, valor: String, cor: Color) -> some View {
         VStack(alignment: .leading, spacing: 6) {
             Text(titulo)
@@ -216,6 +263,26 @@ struct ContentView: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(14)
         .background(cardBackground)
+    }
+
+    private func campoTexto(titulo: String, texto: Binding<String>, placeholder: String) -> some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text(titulo)
+                .font(.system(size: 12, weight: .semibold, design: .rounded))
+                .foregroundStyle(corSecundaria)
+
+            TextField(placeholder, text: texto)
+                .textFieldStyle(.plain)
+                .font(.system(size: 16, weight: .bold, design: .rounded))
+                .foregroundStyle(corCampo)
+                .padding(.horizontal, 12)
+                .padding(.vertical, 10)
+                .background(
+                    RoundedRectangle(cornerRadius: 14, style: .continuous)
+                        .fill(Color.white.opacity(0.92))
+                )
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     private var listaUnidades: some View {
@@ -420,5 +487,5 @@ struct ContentView: View {
 
 #Preview {
     ContentView()
-        .frame(width: 850, height: 350)
+        .frame(width: 850, height: 750)
 }

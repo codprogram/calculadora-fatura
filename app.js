@@ -4,12 +4,20 @@ const initialUnits = [
 const state = {
     geracaoTotal: "",
     valorKWh: "1,17",
+    nomeCliente: "",
+    codigoCliente: "",
+    enderecoUnidade: "",
+    vencimentoFatura: "",
     unidades: initialUnits
 };
 
 const elements = {
     geracaoTotal: document.querySelector("#geracaoTotal"),
     valorKWh: document.querySelector("#valorKWh"),
+    nomeCliente: document.querySelector("#nomeCliente"),
+    codigoCliente: document.querySelector("#codigoCliente"),
+    enderecoUnidade: document.querySelector("#enderecoUnidade"),
+    vencimentoFatura: document.querySelector("#vencimentoFatura"),
     adicionarUnidade: document.querySelector("#adicionarUnidade"),
     totalUnidades: document.querySelector("#totalUnidades"),
     totalDistribuido: document.querySelector("#totalDistribuido"),
@@ -198,6 +206,10 @@ function render() {
 
     elements.geracaoTotal.value = state.geracaoTotal;
     elements.valorKWh.value = state.valorKWh;
+    elements.nomeCliente.value = state.nomeCliente;
+    elements.codigoCliente.value = state.codigoCliente;
+    elements.enderecoUnidade.value = state.enderecoUnidade;
+    elements.vencimentoFatura.value = state.vencimentoFatura;
 
     renderResumo(distribuicao);
     renderLista(distribuicao);
@@ -263,6 +275,22 @@ elements.valorKWh.addEventListener("input", (event) => {
         end: event.target.selectionEnd
     };
     render();
+});
+
+elements.nomeCliente.addEventListener("input", (event) => {
+    state.nomeCliente = event.target.value;
+});
+
+elements.codigoCliente.addEventListener("input", (event) => {
+    state.codigoCliente = event.target.value;
+});
+
+elements.enderecoUnidade.addEventListener("input", (event) => {
+    state.enderecoUnidade = event.target.value;
+});
+
+elements.vencimentoFatura.addEventListener("input", (event) => {
+    state.vencimentoFatura = event.target.value;
 });
 
 elements.adicionarUnidade.addEventListener("click", () => {
