@@ -28,6 +28,21 @@ const elements = {
     feedbackPanel: document.querySelector(".feedback-panel"),
     feedbackStatus: document.querySelector("#feedbackStatus"),
     feedbackDetalhes: document.querySelector("#feedbackDetalhes"),
+    gerarPdf: document.querySelector("#gerarPdf"),
+    reportCliente: document.querySelector("#reportCliente"),
+    reportCodigo: document.querySelector("#reportCodigo"),
+    reportEndereco: document.querySelector("#reportEndereco"),
+    reportEmissao: document.querySelector("#reportEmissao"),
+    reportVencimento: document.querySelector("#reportVencimento"),
+    reportConsumo: document.querySelector("#reportConsumo"),
+    reportSemCreditos: document.querySelector("#reportSemCreditos"),
+    reportComCreditos: document.querySelector("#reportComCreditos"),
+    reportEconomia: document.querySelector("#reportEconomia"),
+    reportLinhaSemCreditos: document.querySelector("#reportLinhaSemCreditos"),
+    reportLinhaComCreditos: document.querySelector("#reportLinhaComCreditos"),
+    reportLinhaEconomia: document.querySelector("#reportLinhaEconomia"),
+    reportPagamentoEmpresa: document.querySelector("#reportPagamentoEmpresa"),
+    reportRanking: document.querySelector("#reportRanking"),
     listaUnidades: document.querySelector("#listaUnidades"),
     resultadoRateio: document.querySelector("#resultadoRateio"),
     unidadeTemplate: document.querySelector("#unidadeTemplate")
@@ -232,6 +247,56 @@ function renderFeedback(distribuicao) {
     elements.feedbackDetalhes.textContent = `Unidades validas: ${unidadesValidas} de ${state.unidades.length} | Distribuido: ${formatarPercentual(percentualDistribuido)} | Faltante: ${formatarPercentual(percentualFaltante)}`;
 }
 
+function formatarData(dataIso) {
+    if (!dataIso) return "-";
+    const data = new Date(`${dataIso}T12:00:00`);
+    if (Number.isNaN(data.getTime())) return "-";
+    return new Intl.DateTimeFormat("pt-BR").format(data);
+}
+
+function renderReport(distribuicao) {
+    const hoje = new Intl.DateTimeFormat("pt-BR").format(new Date());
+    const consumoTotal = distribuicao.reduce((acc, item) => acc + item.media, 0);
+    const valorComCreditos = distribuicao.reduce((acc, item) => acc + item.valorComCreditos, 0);
+    const valorSemCreditos = distribuicao.reduce((acc, item) => acc + item.valorSemCreditos, 0);
+    const economia = Math.max(valorSemCreditos - valorComCreditos, 0);
+    const ranking = [...distribuicao].sort((a, b) => b.percentualGeracaoTotal - a.percentualGeracaoTotal);
+
+    elements.reportCliente.textContent = state.nomeCliente.trim() || "Cliente nao informado";
+    elements.reportCodigo.textContent = `Codigo do cliente: ${state.codigoCliente.trim() || "-"}`;
+    elements.reportEndereco.textContent = `Endereco da unidade consumidora: ${state.enderecoUnidade.trim() || "-"}`;
+    elements.reportEmissao.textContent = hoje;
+    elements.reportVencimento.textContent = formatarData(state.vencimentoFatura);
+    elements.reportConsumo.textContent = `${formatarNumero(consumoTotal)} kWh`;
+    elements.reportSemCreditos.textContent = formatarMoeda(valorSemCreditos);
+    elements.reportComCreditos.textContent = formatarMoeda(valorComCreditos);
+    elements.reportEconomia.textContent = formatarMoeda(economia);
+    elements.reportLinhaSemCreditos.textContent = formatarMoeda(valorSemCreditos);
+    elements.reportLinhaComCreditos.textContent = formatarMoeda(valorComCreditos);
+    elements.reportLinhaEconomia.textContent = formatarMoeda(economia);
+    elements.reportPagamentoEmpresa.textContent = formatarMoeda(valorComCreditos);
+    elements.reportRanking.innerHTML = "";
+
+    if (!ranking.length) {
+        elements.reportRanking.innerHTML = '<div class="empty-state">Nenhuma unidade cadastrada para gerar o relatorio.</div>';
+        return;
+    }
+
+    ranking.forEach((item, index) => {
+        const row = document.createElement("div");
+        row.className = "report-ranking-row";
+        row.innerHTML = `
+            <div class="report-ranking-pos">${index + 1}</div>
+            <div class="report-ranking-meta">
+                <strong>${item.nome}</strong>
+                <span>Media: ${formatarNumero(item.media)} kWh</span>
+            </div>
+            <div class="report-ranking-value">${formatarPercentual(item.percentualGeracaoTotal)}</div>
+        `;
+        elements.reportRanking.appendChild(row);
+    });
+}
+
 function render() {
     const geracaoTotal = parseNumero(state.geracaoTotal);
     const unidades = unidadesCalculadas();
@@ -248,6 +313,7 @@ function render() {
     renderLista(distribuicao);
     renderResultado(distribuicao);
     renderFeedback(distribuicao);
+    renderReport(distribuicao);
 }
 
 function restoreActiveField() {
@@ -325,6 +391,11 @@ elements.enderecoUnidade.addEventListener("input", (event) => {
 
 elements.vencimentoFatura.addEventListener("input", (event) => {
     state.vencimentoFatura = event.target.value;
+    render();
+});
+
+elements.gerarPdf.addEventListener("click", () => {
+    window.print();
 });
 
 elements.adicionarUnidade.addEventListener("click", () => {

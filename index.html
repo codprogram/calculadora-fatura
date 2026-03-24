@@ -30,6 +30,7 @@
                 </label>
 
                 <button id="adicionarUnidade" class="primary-button" type="button">Adicionar unidade</button>
+                <button id="gerarPdf" class="secondary-button" type="button">Gerar PDF</button>
             </div>
         </section>
 
@@ -109,6 +110,84 @@
                 <p id="feedbackStatus">Informe a geracao total para validar a distribuicao.</p>
             </div>
             <div id="feedbackDetalhes" class="feedback-details"></div>
+        </section>
+
+        <section class="card report-shell">
+            <div class="report-brand">
+                <span class="report-mark">Sunprime Energy</span>
+                <span class="report-subtitle">Relatorio de Creditos de Energia</span>
+            </div>
+
+            <div class="report-header">
+                <div>
+                    <h2 id="reportCliente">Cliente nao informado</h2>
+                    <p id="reportCodigo">Codigo do cliente: -</p>
+                    <p id="reportEndereco">Endereco da unidade consumidora: -</p>
+                </div>
+                <div class="report-meta-box">
+                    <span>Emissao</span>
+                    <strong id="reportEmissao">-</strong>
+                    <span>Vencimento</span>
+                    <strong id="reportVencimento">-</strong>
+                </div>
+            </div>
+
+            <div class="report-highlight-grid">
+                <article class="report-highlight">
+                    <span>Consumo considerado</span>
+                    <strong id="reportConsumo">0,00 kWh</strong>
+                </article>
+                <article class="report-highlight">
+                    <span>Valor sem creditos</span>
+                    <strong id="reportSemCreditos">R$ 0,00</strong>
+                </article>
+                <article class="report-highlight">
+                    <span>Valor com creditos</span>
+                    <strong id="reportComCreditos">R$ 0,00</strong>
+                </article>
+                <article class="report-highlight">
+                    <span>Economia estimada</span>
+                    <strong id="reportEconomia">R$ 0,00</strong>
+                </article>
+            </div>
+
+            <div class="report-sections">
+                <section class="report-card-block">
+                    <h3>Resumo financeiro</h3>
+                    <div class="report-lines">
+                        <div class="report-line">
+                            <span>Fatura sem creditos da concessionaria</span>
+                            <strong id="reportLinhaSemCreditos">R$ 0,00</strong>
+                        </div>
+                        <div class="report-line">
+                            <span>Valor dos creditos com a Sunprime Energy</span>
+                            <strong id="reportLinhaComCreditos">R$ 0,00</strong>
+                        </div>
+                        <div class="report-line">
+                            <span>Economia estimada no periodo</span>
+                            <strong id="reportLinhaEconomia">R$ 0,00</strong>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="report-card-block">
+                    <h3>Pagamento Sunprime Energy</h3>
+                    <p class="report-note">
+                        Valor referente aos creditos de energia utilizados para reduzir o custo do cliente no periodo analisado.
+                    </p>
+                    <div class="report-payment-value" id="reportPagamentoEmpresa">R$ 0,00</div>
+                    <div class="report-payment-info">
+                        <div><span>PIX</span><strong>81 99303-2035</strong></div>
+                        <div><span>Banco</span><strong>Nubank</strong></div>
+                        <div><span>Favorecido</span><strong>Emidio Nascimento de Souza</strong></div>
+                    </div>
+                </section>
+            </div>
+
+            <section class="report-card-block report-ranking">
+                <h3>Ranking percentual das unidades</h3>
+                <div id="reportRanking" class="report-ranking-list"></div>
+            </section>
         </section>
     </main>
 
