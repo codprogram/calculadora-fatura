@@ -7,8 +7,8 @@
     --text: #102030;
     --muted: #556577;
     --line: #d3dde7;
-    --accent: #1b6ea1;
-    --accent-strong: #0f527b;
+    --accent: #ef8b1e;
+    --accent-strong: #c86100;
     --success: #0d7a57;
     --shadow: 0 20px 45px rgba(14, 41, 66, 0.10);
 }
@@ -136,7 +136,7 @@ input {
 
 .field input:focus {
     border-color: var(--accent);
-    box-shadow: 0 0 0 4px rgba(27, 110, 161, 0.14);
+    box-shadow: 0 0 0 4px rgba(239, 139, 30, 0.16);
 }
 
 .primary-button,
@@ -223,7 +223,7 @@ input {
     position: absolute;
     inset: 0 0 auto 0;
     height: 8px;
-    background: linear-gradient(90deg, #0f527b, #1b6ea1, #4ea4c8);
+    background: linear-gradient(90deg, #c86100, #ef8b1e, #ffba5a);
 }
 
 .panel-header {
@@ -288,7 +288,7 @@ input {
     border: 0;
     border-radius: 12px;
     padding: 10px 12px;
-    background: rgba(27, 110, 161, 0.10);
+    background: rgba(239, 139, 30, 0.12);
     color: var(--accent-strong);
     font-weight: 800;
     cursor: pointer;
@@ -389,7 +389,7 @@ input {
 }
 
 .feedback-panel.is-progress {
-    border-color: rgba(27, 110, 161, 0.28);
+    border-color: rgba(239, 139, 30, 0.28);
 }
 
 .feedback-panel.is-success {
@@ -401,7 +401,7 @@ input {
 }
 
 .feedback-panel.is-progress #feedbackStatus {
-    color: #1b6ea1;
+    color: #c86100;
 }
 
 .feedback-panel.is-success #feedbackStatus {
@@ -457,7 +457,7 @@ input {
     padding: 18px;
     border-radius: 20px;
     background: linear-gradient(180deg, #f3f7fb, #edf4fa);
-    border: 1px solid rgba(27, 110, 161, 0.10);
+    border: 1px solid rgba(239, 139, 30, 0.12);
 }
 
 .report-meta-box span,
@@ -480,7 +480,7 @@ input {
     padding: 18px;
     border-radius: 20px;
     background: linear-gradient(180deg, #f8fbff, #f1f7fc);
-    border: 1px solid rgba(27, 110, 161, 0.12);
+    border: 1px solid rgba(239, 139, 30, 0.15);
 }
 
 .report-highlight strong {
@@ -573,7 +573,7 @@ input {
     display: grid;
     place-items: center;
     border-radius: 999px;
-    background: rgba(27, 110, 161, 0.10);
+    background: rgba(239, 139, 30, 0.14);
     color: var(--accent-strong);
     font-weight: 900;
 }
