@@ -237,6 +237,53 @@ input {
     gap: 14px;
 }
 
+.client-actions {
+    display: grid;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.client-button-row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.saved-client-list {
+    display: grid;
+    gap: 8px;
+    margin-bottom: 16px;
+}
+
+.saved-client-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 14px;
+    border-radius: 16px;
+    background: rgba(16, 32, 48, 0.04);
+}
+
+.saved-client-meta strong {
+    display: block;
+}
+
+.saved-client-meta span {
+    color: var(--muted);
+    font-size: 0.9rem;
+}
+
+.saved-client-item button {
+    border: 0;
+    border-radius: 12px;
+    padding: 10px 12px;
+    background: rgba(27, 110, 161, 0.10);
+    color: var(--accent-strong);
+    font-weight: 800;
+    cursor: pointer;
+}
+
 .field-wide {
     grid-column: span 1;
 }

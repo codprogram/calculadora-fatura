@@ -1,8 +1,12 @@
 const initialUnits = [
     { id: crypto.randomUUID(), nome: "", media: "" }
 ];
+const STORAGE_KEY = "sunprime-clientes-v1";
 const state = {
     abaAtual: "calculadora",
+    buscaCliente: "",
+    clienteSelecionadoId: null,
+    clientesSalvos: [],
     geracaoTotal: "",
     valorKWh: "1,17",
     nomeCliente: "",
@@ -16,6 +20,10 @@ const VALOR_KWH_SEM_CREDITOS = 1.36;
 const elements = {
     geracaoTotal: document.querySelector("#geracaoTotal"),
     valorKWh: document.querySelector("#valorKWh"),
+    buscaCliente: document.querySelector("#buscaCliente"),
+    salvarCliente: document.querySelector("#salvarCliente"),
+    novoCliente: document.querySelector("#novoCliente"),
+    listaClientes: document.querySelector("#listaClientes"),
     nomeCliente: document.querySelector("#nomeCliente"),
     codigoCliente: document.querySelector("#codigoCliente"),
     enderecoUnidade: document.querySelector("#enderecoUnidade"),
@@ -46,6 +54,7 @@ const elements = {
     reportLinhaEconomia: document.querySelector("#reportLinhaEconomia"),
     reportPagamentoEmpresa: document.querySelector("#reportPagamentoEmpresa"),
     reportRanking: document.querySelector("#reportRanking"),
+    reportHistorico: document.querySelector("#reportHistorico"),
     listaUnidades: document.querySelector("#listaUnidades"),
     resultadoRateio: document.querySelector("#resultadoRateio"),
     unidadeTemplate: document.querySelector("#unidadeTemplate")
@@ -81,6 +90,23 @@ function formatarMoeda(valor) {
     }).format(valor);
 }
 
+function uid() {
+    return crypto.randomUUID();
+}
+
+function carregarClientesSalvos() {
+    try {
+        const bruto = localStorage.getItem(STORAGE_KEY);
+        state.clientesSalvos = bruto ? JSON.parse(bruto) : [];
+    } catch {
+        state.clientesSalvos = [];
+    }
+}
+
+function persistirClientesSalvos() {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state.clientesSalvos));
+}
+
 function unidadesCalculadas() {
     return state.unidades.map((unidade) => ({
         id: unidade.id,
@@ -92,6 +118,17 @@ function unidadesCalculadas() {
 function valorKWhAtual() {
     const valor = parseNumero(state.valorKWh);
     return valor > 0 ? valor : 1.17;
+}
+
+function clientesFiltrados() {
+    const termo = state.buscaCliente.trim().toLowerCase();
+    if (!termo) return state.clientesSalvos;
+
+    return state.clientesSalvos.filter((cliente) => {
+        const nome = (cliente.nomeCliente || "").toLowerCase();
+        const codigo = (cliente.codigoCliente || "").toLowerCase();
+        return nome.includes(termo) || codigo.includes(termo);
+    });
 }
 
 function calcularPercentuais(unidades) {
@@ -223,6 +260,121 @@ function renderResultado(distribuicao) {
     });
 }
 
+function snapshotAtual(distribuicao) {
+    const valorComCreditos = distribuicao.reduce((acc, item) => acc + item.valorComCreditos, 0);
+    const valorSemCreditos = distribuicao.reduce((acc, item) => acc + item.valorSemCreditos, 0);
+    return {
+        nomeCliente: state.nomeCliente.trim(),
+        codigoCliente: state.codigoCliente.trim(),
+        enderecoUnidade: state.enderecoUnidade.trim(),
+        vencimentoFatura: state.vencimentoFatura,
+        geracaoTotal: state.geracaoTotal,
+        valorKWh: state.valorKWh,
+        unidades: state.unidades.map((unidade) => ({ ...unidade })),
+        resumo: {
+            valorComCreditos,
+            valorSemCreditos,
+            economia: Math.max(valorSemCreditos - valorComCreditos, 0)
+        }
+    };
+}
+
+function preencherCliente(cliente) {
+    const snapshot = cliente.ultimoSnapshot;
+    state.clienteSelecionadoId = cliente.id;
+    state.nomeCliente = snapshot.nomeCliente || "";
+    state.codigoCliente = snapshot.codigoCliente || "";
+    state.enderecoUnidade = snapshot.enderecoUnidade || "";
+    state.vencimentoFatura = snapshot.vencimentoFatura || "";
+    state.geracaoTotal = snapshot.geracaoTotal || "";
+    state.valorKWh = snapshot.valorKWh || "1,17";
+    state.unidades = snapshot.unidades?.length ? snapshot.unidades.map((unidade) => ({ ...unidade })) : [{ id: uid(), nome: "", media: "" }];
+    render();
+}
+
+function salvarClienteAtual() {
+    const distribuicao = distribuirEnergia(unidadesCalculadas(), parseNumero(state.geracaoTotal));
+    const snapshot = snapshotAtual(distribuicao);
+
+    if (!snapshot.nomeCliente) {
+        alert("Informe o nome do cliente antes de salvar.");
+        return;
+    }
+
+    const historicoItem = {
+        id: uid(),
+        createdAt: new Date().toISOString(),
+        snapshot
+    };
+
+    const index = state.clientesSalvos.findIndex((cliente) => cliente.id === state.clienteSelecionadoId);
+    if (index >= 0) {
+        const atual = state.clientesSalvos[index];
+        state.clientesSalvos[index] = {
+            ...atual,
+            nomeCliente: snapshot.nomeCliente,
+            codigoCliente: snapshot.codigoCliente,
+            ultimoSnapshot: snapshot,
+            updatedAt: historicoItem.createdAt,
+            historico: [...(atual.historico || []), historicoItem]
+        };
+    } else {
+        const novo = {
+            id: uid(),
+            nomeCliente: snapshot.nomeCliente,
+            codigoCliente: snapshot.codigoCliente,
+            createdAt: historicoItem.createdAt,
+            updatedAt: historicoItem.createdAt,
+            ultimoSnapshot: snapshot,
+            historico: [historicoItem]
+        };
+        state.clientesSalvos.unshift(novo);
+        state.clienteSelecionadoId = novo.id;
+    }
+
+    persistirClientesSalvos();
+    render();
+}
+
+function novoCliente() {
+    state.clienteSelecionadoId = null;
+    state.buscaCliente = "";
+    state.nomeCliente = "";
+    state.codigoCliente = "";
+    state.enderecoUnidade = "";
+    state.vencimentoFatura = "";
+    state.geracaoTotal = "";
+    state.valorKWh = "1,17";
+    state.unidades = [{ id: uid(), nome: "", media: "" }];
+    render();
+}
+
+function renderClientesSalvos() {
+    if (!elements.listaClientes || !elements.buscaCliente) return;
+    elements.buscaCliente.value = state.buscaCliente;
+    elements.listaClientes.innerHTML = "";
+
+    const lista = clientesFiltrados().slice(0, 8);
+    if (!lista.length) {
+        elements.listaClientes.innerHTML = '<div class="empty-state">Nenhum cliente salvo encontrado.</div>';
+        return;
+    }
+
+    lista.forEach((cliente) => {
+        const item = document.createElement("div");
+        item.className = "saved-client-item";
+        item.innerHTML = `
+            <div class="saved-client-meta">
+                <strong>${cliente.nomeCliente}</strong>
+                <span>Codigo: ${cliente.codigoCliente || "-"} | Relatorios: ${(cliente.historico || []).length}</span>
+            </div>
+            <button type="button">Selecionar</button>
+        `;
+        item.querySelector("button").addEventListener("click", () => preencherCliente(cliente));
+        elements.listaClientes.appendChild(item);
+    });
+}
+
 function renderFeedback(distribuicao) {
     const unidadesValidas = state.unidades.filter((unidade) => unidade.nome.trim() && parseNumero(unidade.media) > 0).length;
     const geracaoTotal = parseNumero(state.geracaoTotal);
@@ -279,6 +431,7 @@ function renderReport(distribuicao) {
     elements.reportLinhaEconomia.textContent = formatarMoeda(economia);
     elements.reportPagamentoEmpresa.textContent = formatarMoeda(valorComCreditos);
     elements.reportRanking.innerHTML = "";
+    elements.reportHistorico.innerHTML = "";
 
     if (!ranking.length) {
         elements.reportRanking.innerHTML = '<div class="empty-state">Nenhuma unidade cadastrada para gerar o relatorio.</div>';
@@ -298,6 +451,29 @@ function renderReport(distribuicao) {
         `;
         elements.reportRanking.appendChild(row);
     });
+
+    const clienteAtual = state.clientesSalvos.find((cliente) => cliente.id === state.clienteSelecionadoId);
+    if (!clienteAtual || !(clienteAtual.historico || []).length) {
+        elements.reportHistorico.innerHTML = '<div class="empty-state">Nenhum relatorio salvo para este cliente.</div>';
+        return;
+    }
+
+    [...clienteAtual.historico]
+        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+        .slice(0, 6)
+        .forEach((item, index) => {
+            const row = document.createElement("div");
+            row.className = "report-ranking-row";
+            row.innerHTML = `
+                <div class="report-ranking-pos">${index + 1}</div>
+                <div class="report-ranking-meta">
+                    <strong>${new Intl.DateTimeFormat("pt-BR", { dateStyle: "short", timeStyle: "short" }).format(new Date(item.createdAt))}</strong>
+                    <span>Com creditos: ${formatarMoeda(item.snapshot.resumo.valorComCreditos)} | Sem creditos: ${formatarMoeda(item.snapshot.resumo.valorSemCreditos)}</span>
+                </div>
+                <div class="report-ranking-value">${formatarMoeda(item.snapshot.resumo.economia)}</div>
+            `;
+            elements.reportHistorico.appendChild(row);
+        });
 }
 
 function renderTabs() {
@@ -317,12 +493,14 @@ function render() {
 
     elements.geracaoTotal.value = state.geracaoTotal;
     elements.valorKWh.value = state.valorKWh;
+    if (elements.buscaCliente) elements.buscaCliente.value = state.buscaCliente;
     elements.nomeCliente.value = state.nomeCliente;
     elements.codigoCliente.value = state.codigoCliente;
     elements.enderecoUnidade.value = state.enderecoUnidade;
     elements.vencimentoFatura.value = state.vencimentoFatura;
 
     renderResumo(distribuicao);
+    renderClientesSalvos();
     renderLista(distribuicao);
     renderResultado(distribuicao);
     renderFeedback(distribuicao);
@@ -393,20 +571,42 @@ elements.valorKWh.addEventListener("input", (event) => {
 
 elements.nomeCliente.addEventListener("input", (event) => {
     state.nomeCliente = event.target.value;
+    render();
 });
 
 elements.codigoCliente.addEventListener("input", (event) => {
     state.codigoCliente = event.target.value;
+    render();
 });
 
 elements.enderecoUnidade.addEventListener("input", (event) => {
     state.enderecoUnidade = event.target.value;
+    render();
 });
 
 elements.vencimentoFatura.addEventListener("input", (event) => {
     state.vencimentoFatura = event.target.value;
     render();
 });
+
+if (elements.buscaCliente) {
+    elements.buscaCliente.addEventListener("input", (event) => {
+        state.buscaCliente = event.target.value;
+        renderClientesSalvos();
+    });
+}
+
+if (elements.salvarCliente) {
+    elements.salvarCliente.addEventListener("click", () => {
+        salvarClienteAtual();
+    });
+}
+
+if (elements.novoCliente) {
+    elements.novoCliente.addEventListener("click", () => {
+        novoCliente();
+    });
+}
 
 elements.gerarPdf.addEventListener("click", () => {
     window.print();
@@ -421,11 +621,12 @@ elements.tabButtons.forEach((button) => {
 
 elements.adicionarUnidade.addEventListener("click", () => {
     state.unidades.push({
-        id: crypto.randomUUID(),
+        id: uid(),
         nome: "",
         media: ""
     });
     render();
 });
 
+carregarClientesSalvos();
 render();

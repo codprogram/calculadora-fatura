@@ -68,6 +68,19 @@
                 <p>Preencha as informacoes principais antes de cadastrar as unidades.</p>
             </div>
 
+            <div class="client-actions">
+                <label class="field field-wide">
+                    <span>Buscar cliente salvo</span>
+                    <input id="buscaCliente" type="text" placeholder="Digite nome, sobrenome ou codigo">
+                </label>
+                <div class="client-button-row">
+                    <button id="salvarCliente" class="primary-button" type="button">Salvar cliente</button>
+                    <button id="novoCliente" class="secondary-button" type="button">Novo cliente</button>
+                </div>
+            </div>
+
+            <div id="listaClientes" class="saved-client-list"></div>
+
             <div class="client-grid">
                 <label class="field">
                     <span>Nome do cliente</span>
@@ -192,6 +205,11 @@
             <section class="report-card-block report-ranking">
                 <h3>Ranking percentual das unidades</h3>
                 <div id="reportRanking" class="report-ranking-list"></div>
+            </section>
+
+            <section class="report-card-block report-ranking">
+                <h3>Historico do cliente</h3>
+                <div id="reportHistorico" class="report-ranking-list"></div>
             </section>
         </section>
     </main>
