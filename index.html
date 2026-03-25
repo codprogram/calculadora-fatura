@@ -29,12 +29,12 @@
                     <input id="valorKWh" type="text" inputmode="decimal" value="1,17">
                 </label>
 
-                <button id="adicionarUnidade" class="primary-button" type="button">Adicionar unidade</button>
+                <button id="adicionarUnidade" class="primary-button" type="button" data-tab-control="calculadora">Adicionar unidade</button>
                 <button id="gerarPdf" class="secondary-button" type="button">Gerar PDF</button>
             </div>
         </section>
 
-        <section class="summary-grid">
+        <section class="summary-grid" data-tab-section="calculadora">
             <article class="summary-card card">
                 <span class="summary-label">Unidades</span>
                 <strong id="totalUnidades" class="summary-value">0</strong>
@@ -66,7 +66,7 @@
         <section class="card panel client-panel" data-tab-section="relatorio">
             <div class="panel-header">
                 <h2>Dados do cliente</h2>
-                <p>Preencha as informacoes principais antes de cadastrar as unidades. <span id="modoPersistencia">Modo local</span></p>
+                <p>Preencha o cadastro e os valores financeiros do periodo. <span id="modoPersistencia">Modo local</span></p>
             </div>
 
             <div class="client-actions">
@@ -105,7 +105,7 @@
             </div>
         </section>
 
-        <section class="layout">
+        <section class="layout" data-tab-section="calculadora">
             <section class="card panel">
                 <div class="panel-header">
                     <h2>Unidades</h2>
@@ -113,17 +113,53 @@
                 </div>
                 <div id="listaUnidades" class="unit-list"></div>
             </section>
+        </section>
 
-            <section class="card panel result-panel" data-tab-section="relatorio">
+        <section class="layout" data-tab-section="relatorio">
+            <section class="card panel result-panel">
                 <div class="panel-header">
-                    <h2>Ranking do rateio</h2>
-                    <p>Distribuicao proporcional sobre o consumo medio total, com valor do kWh editavel.</p>
+                    <h2>Parametros financeiros do relatorio</h2>
+                    <p>Lance os valores reais do periodo. Eles ficam vinculados ao cliente salvo para formar historico mensal.</p>
                 </div>
-                <div id="resultadoRateio" class="result-list"></div>
+                <div class="client-grid">
+                    <label class="field">
+                        <span>Consumo real (kWh)</span>
+                        <input id="consumoReal" type="text" inputmode="decimal" placeholder="Ex.: 1242">
+                    </label>
+
+                    <label class="field">
+                        <span>Valor original da fatura</span>
+                        <input id="valorOriginalFatura" type="text" inputmode="decimal" placeholder="Ex.: 1687,89">
+                    </label>
+
+                    <label class="field field-wide">
+                        <span>Valor final com nossos servicos</span>
+                        <input id="valorComServicos" type="text" inputmode="decimal" placeholder="Ex.: 1394,98">
+                    </label>
+                </div>
+
+                <div class="summary-grid commercial-grid">
+                    <article class="summary-card card">
+                        <span class="summary-label">Consumo real</span>
+                        <strong id="relatorioConsumo" class="summary-value">0,00 kWh</strong>
+                    </article>
+                    <article class="summary-card card">
+                        <span class="summary-label">Sem nossos servicos</span>
+                        <strong id="relatorioSemServicos" class="summary-value">R$ 0,00</strong>
+                    </article>
+                    <article class="summary-card card">
+                        <span class="summary-label">Com nossos servicos</span>
+                        <strong id="relatorioComServicos" class="summary-value">R$ 0,00</strong>
+                    </article>
+                    <article class="summary-card card">
+                        <span class="summary-label">Economia do periodo</span>
+                        <strong id="relatorioEconomia" class="summary-value">R$ 0,00</strong>
+                    </article>
+                </div>
             </section>
         </section>
 
-        <section class="card panel feedback-panel">
+        <section class="card panel feedback-panel" data-tab-section="calculadora">
             <div class="panel-header">
                 <h2>Feedback da distribuicao</h2>
                 <p id="feedbackStatus">Informe a geracao total para validar a distribuicao.</p>
@@ -140,22 +176,22 @@
             <div class="client-grid">
                 <label class="field">
                     <span>Consumo real (kWh)</span>
-                    <input id="consumoReal" type="text" inputmode="decimal" placeholder="Ex.: 1242">
+                    <input id="commercialConsumoReal" type="text" inputmode="decimal" placeholder="Ex.: 1242">
                 </label>
 
                 <label class="field">
                     <span>Valor original da fatura</span>
-                    <input id="valorOriginalFatura" type="text" inputmode="decimal" placeholder="Ex.: 1687,89">
+                    <input id="commercialValorOriginalFatura" type="text" inputmode="decimal" placeholder="Ex.: 1687,89">
                 </label>
 
                 <label class="field">
                     <span>Concessionaria com creditos</span>
-                    <input id="valorConcessionariaComCreditos" type="text" inputmode="decimal" placeholder="Ex.: 539,35">
+                    <input id="commercialValorConcessionariaComCreditos" type="text" inputmode="decimal" placeholder="Ex.: 539,35">
                 </label>
 
                 <label class="field">
                     <span>Tarifa Sunprime por kWh</span>
-                    <input id="tarifaSunprime" type="text" inputmode="decimal" value="0,68891">
+                    <input id="commercialTarifaSunprime" type="text" inputmode="decimal" value="0,68891">
                 </label>
             </div>
 
@@ -213,11 +249,11 @@
                     <strong id="reportConsumo">0,00 kWh</strong>
                 </article>
                 <article class="report-highlight">
-                    <span>Valor sem creditos</span>
+                    <span>Valor sem nossos servicos</span>
                     <strong id="reportSemCreditos">R$ 0,00</strong>
                 </article>
                 <article class="report-highlight">
-                    <span>Valor com creditos</span>
+                    <span>Valor com nossos servicos</span>
                     <strong id="reportComCreditos">R$ 0,00</strong>
                 </article>
                 <article class="report-highlight">
@@ -231,11 +267,11 @@
                     <h3>Resumo financeiro</h3>
                     <div class="report-lines">
                         <div class="report-line">
-                            <span>Fatura sem creditos da concessionaria</span>
+                            <span>Fatura original sem nossos servicos</span>
                             <strong id="reportLinhaSemCreditos">R$ 0,00</strong>
                         </div>
                         <div class="report-line">
-                            <span>Valor dos creditos com a Sunprime Energy</span>
+                            <span>Valor final pago com nossos servicos</span>
                             <strong id="reportLinhaComCreditos">R$ 0,00</strong>
                         </div>
                         <div class="report-line">
@@ -248,7 +284,7 @@
                 <section class="report-card-block">
                     <h3>Pagamento Sunprime Energy</h3>
                     <p class="report-note">
-                        Valor referente aos creditos de energia utilizados para reduzir o custo do cliente no periodo analisado.
+                        Valor total do periodo apos a contratacao dos servicos e creditos de energia da Sunprime.
                     </p>
                     <div class="report-payment-value" id="reportPagamentoEmpresa">R$ 0,00</div>
                     <div class="report-payment-info">
@@ -260,8 +296,8 @@
             </div>
 
             <section class="report-card-block report-ranking">
-                <h3>Ranking percentual das unidades</h3>
-                <div id="reportRanking" class="report-ranking-list"></div>
+                <h3>Indicadores do periodo</h3>
+                <div id="reportIndicadores" class="report-ranking-list"></div>
             </section>
 
             <section class="report-card-block report-ranking">

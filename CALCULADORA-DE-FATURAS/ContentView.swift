@@ -42,6 +42,7 @@ struct ContentView: View {
     @State private var vencimentoFatura = Date()
     @State private var consumoRealTexto = ""
     @State private var valorOriginalFaturaTexto = ""
+    @State private var valorComServicosTexto = ""
     @State private var valorConcessionariaComCreditosTexto = ""
     @State private var tarifaSunprimeTexto = "0,68891"
     @State private var modoTela: ModoTela = .calculadora
@@ -71,6 +72,10 @@ struct ContentView: View {
         parseNumero(valorOriginalFaturaTexto)
     }
 
+    var valorComServicos: Double {
+        parseNumero(valorComServicosTexto)
+    }
+
     var valorConcessionariaComCreditos: Double {
         parseNumero(valorConcessionariaComCreditosTexto)
     }
@@ -82,6 +87,27 @@ struct ContentView: View {
 
     var valorPagarSunprime: Double {
         consumoReal * tarifaSunprime
+    }
+
+    var economiaRelatorioCliente: Double {
+        max(valorOriginalFatura - valorComServicos, 0)
+    }
+
+    var tarifaComServicosEfetiva: Double {
+        guard consumoReal > 0 else { return valorKWh }
+        return valorComServicos / consumoReal
+    }
+
+    var statusRelatorioCliente: String {
+        if consumoReal <= 0 || valorOriginalFatura <= 0 {
+            return "Informe consumo real e valor original da fatura para montar o relatorio mensal."
+        }
+
+        if valorComServicos <= 0 {
+            return "Informe o valor final pago com os servicos da Sunprime para fechar o comparativo."
+        }
+
+        return "Relatorio mensal pronto. Os dados podem ser reaproveitados no proximo periodo como historico do cliente."
     }
 
     var economiaRelatorioComercial: Double {
@@ -200,21 +226,22 @@ struct ContentView: View {
                 VStack(spacing: 16) {
                     cabecalho
                     seletorModo
-                    if modoTela != .comercial {
+                    if modoTela == .calculadora {
                         resumo
                     }
                     if modoTela == .relatorio || modoTela == .comercial {
                         dadosCliente
                     }
-                    if modoTela != .comercial {
+                    if modoTela == .calculadora {
                         listaUnidades
                     }
                     if modoTela == .relatorio {
-                        painelResultado
+                        painelRelatorioCliente
                     }
                     if modoTela == .comercial {
                         painelRelatorioComercial
-                    } else {
+                    }
+                    if modoTela == .calculadora {
                         cardFeedback
                     }
                 }
@@ -244,62 +271,75 @@ struct ContentView: View {
                 .font(.system(size: 26, weight: .bold, design: .rounded))
                 .foregroundStyle(corTitulo)
 
-            Text("Informe diretamente a media de consumo de cada unidade. O sistema calcula o percentual de participacao e distribui a geracao total em kWh.")
+            Text(textoCabecalho)
                 .font(.system(size: 13, weight: .medium, design: .rounded))
                 .foregroundStyle(corSecundaria)
 
-            HStack(spacing: 12) {
-                VStack(alignment: .leading, spacing: 6) {
-                    Text("Geracao total (kWh)")
-                        .font(.system(size: 12, weight: .semibold, design: .rounded))
-                        .foregroundStyle(corSecundaria)
+            if modoTela == .calculadora {
+                HStack(spacing: 12) {
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text("Geracao total (kWh)")
+                            .font(.system(size: 12, weight: .semibold, design: .rounded))
+                            .foregroundStyle(corSecundaria)
 
-                    TextField("0", text: $geracaoTotalTexto)
-                        .textFieldStyle(.plain)
-                        .font(.system(size: 18, weight: .bold, design: .rounded))
-                        .foregroundStyle(corCampo)
-                        .padding(.horizontal, 12)
-                        .padding(.vertical, 10)
-                        .background(
-                            RoundedRectangle(cornerRadius: 14, style: .continuous)
-                                .fill(Color.white.opacity(0.92))
-                        )
+                        TextField("0", text: $geracaoTotalTexto)
+                            .textFieldStyle(.plain)
+                            .font(.system(size: 18, weight: .bold, design: .rounded))
+                            .foregroundStyle(corCampo)
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 10)
+                            .background(
+                                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                                    .fill(Color.white.opacity(0.92))
+                            )
+                    }
+
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text("Valor do kWh (R$)")
+                            .font(.system(size: 12, weight: .semibold, design: .rounded))
+                            .foregroundStyle(corSecundaria)
+
+                        TextField("1,17", text: $valorKWhTexto)
+                            .textFieldStyle(.plain)
+                            .font(.system(size: 18, weight: .bold, design: .rounded))
+                            .foregroundStyle(corCampo)
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 10)
+                            .background(
+                                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                                    .fill(Color.white.opacity(0.92))
+                            )
+                    }
+
+                    Button(action: adicionarUnidade) {
+                        Label("Adicionar unidade", systemImage: "plus.circle.fill")
+                            .font(.system(size: 14, weight: .bold, design: .rounded))
+                            .foregroundStyle(.white)
+                            .padding(.horizontal, 14)
+                            .padding(.vertical, 12)
+                            .background(
+                                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                                    .fill(Color(red: 0.13, green: 0.47, blue: 0.64))
+                            )
+                    }
+                    .buttonStyle(.plain)
                 }
-
-                VStack(alignment: .leading, spacing: 6) {
-                    Text("Valor do kWh (R$)")
-                        .font(.system(size: 12, weight: .semibold, design: .rounded))
-                        .foregroundStyle(corSecundaria)
-
-                    TextField("1,17", text: $valorKWhTexto)
-                        .textFieldStyle(.plain)
-                        .font(.system(size: 18, weight: .bold, design: .rounded))
-                        .foregroundStyle(corCampo)
-                        .padding(.horizontal, 12)
-                        .padding(.vertical, 10)
-                        .background(
-                            RoundedRectangle(cornerRadius: 14, style: .continuous)
-                                .fill(Color.white.opacity(0.92))
-                        )
-                }
-
-                Button(action: adicionarUnidade) {
-                    Label("Adicionar unidade", systemImage: "plus.circle.fill")
-                        .font(.system(size: 14, weight: .bold, design: .rounded))
-                        .foregroundStyle(.white)
-                        .padding(.horizontal, 14)
-                        .padding(.vertical, 12)
-                        .background(
-                            RoundedRectangle(cornerRadius: 14, style: .continuous)
-                                .fill(Color(red: 0.13, green: 0.47, blue: 0.64))
-                        )
-                }
-                .buttonStyle(.plain)
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(18)
         .background(cardBackground)
+    }
+
+    private var textoCabecalho: String {
+        switch modoTela {
+        case .calculadora:
+            return "Informe diretamente a media de consumo de cada unidade. O sistema calcula o percentual de participacao e distribui a geracao total em kWh."
+        case .relatorio:
+            return "Preencha os dados do cliente e lance manualmente os valores do periodo. Essa aba fica pronta para manter historico mensal sem depender das unidades do rateio."
+        case .comercial:
+            return "Use esta aba quando precisar simular a logica comercial completa, com residual na concessionaria e cobranca separada da Sunprime."
+        }
     }
 
     private var seletorModo: some View {
@@ -491,31 +531,35 @@ struct ContentView: View {
         )
     }
 
-    private var painelResultado: some View {
+    private var painelRelatorioCliente: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Ranking do Rateio")
+            Text("Relatorio Mensal do Cliente")
                 .font(.system(size: 18, weight: .bold, design: .rounded))
                 .foregroundStyle(corTitulo)
 
-            ForEach(Array(rankingRateio.enumerated()), id: \.offset) { index, item in
-                HStack {
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text("\(index + 1). \(item.nome)")
-                            .font(.system(size: 15, weight: .bold, design: .rounded))
-                            .foregroundStyle(corTitulo)
+            Text(statusRelatorioCliente)
+                .font(.system(size: 12, weight: .semibold, design: .rounded))
+                .foregroundStyle(consumoReal > 0 && valorOriginalFatura > 0 && valorComServicos > 0 ? Color(red: 0.11, green: 0.47, blue: 0.38) : Color(red: 0.68, green: 0.39, blue: 0.12))
 
-                        Text("Media: \(formatarNumero(item.media)) kWh | Com creditos: \(formatarMoeda(item.valorComCreditos)) | Sem creditos: \(formatarMoeda(item.valorSemCreditos))")
-                            .font(.system(size: 12, weight: .medium, design: .rounded))
-                            .foregroundStyle(corSecundaria)
-                    }
+            HStack(spacing: 12) {
+                campoTexto(titulo: "Consumo real (kWh)", texto: $consumoRealTexto, placeholder: "Ex.: 1242")
+                campoTexto(titulo: "Valor original da fatura", texto: $valorOriginalFaturaTexto, placeholder: "Ex.: 1687,89")
+            }
 
-                    Spacer()
+            HStack(spacing: 12) {
+                campoTexto(titulo: "Valor final com nossos servicos", texto: $valorComServicosTexto, placeholder: "Ex.: 1394,98")
+            }
 
-                    Text(formatarPercentual(item.percentual))
-                        .font(.system(size: 16, weight: .bold, design: .rounded))
-                        .foregroundStyle(Color(red: 0.13, green: 0.47, blue: 0.64))
-                }
-                .padding(.vertical, 6)
+            HStack(spacing: 10) {
+                metricaCard(titulo: "Consumo real", valor: "\(formatarNumero(consumoReal)) kWh")
+                metricaCard(titulo: "Sem nossos servicos", valor: formatarMoeda(valorOriginalFatura))
+                metricaCard(titulo: "Com nossos servicos", valor: formatarMoeda(valorComServicos))
+                metricaCard(titulo: "Economia", valor: formatarMoeda(economiaRelatorioCliente))
+            }
+
+            HStack(spacing: 10) {
+                metricaCard(titulo: "Tarifa original", valor: "\(formatarMoeda(tarifaSemCreditosEfetiva))/kWh")
+                metricaCard(titulo: "Tarifa final", valor: "\(formatarMoeda(tarifaComServicosEfetiva))/kWh")
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)

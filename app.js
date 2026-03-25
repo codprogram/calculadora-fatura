@@ -12,6 +12,7 @@ const state = {
     valorKWh: "1,17",
     consumoReal: "",
     valorOriginalFatura: "",
+    valorComServicos: "",
     valorConcessionariaComCreditos: "",
     tarifaSunprime: "0,68891",
     nomeCliente: "",
@@ -27,8 +28,11 @@ const elements = {
     valorKWh: document.querySelector("#valorKWh"),
     consumoReal: document.querySelector("#consumoReal"),
     valorOriginalFatura: document.querySelector("#valorOriginalFatura"),
-    valorConcessionariaComCreditos: document.querySelector("#valorConcessionariaComCreditos"),
-    tarifaSunprime: document.querySelector("#tarifaSunprime"),
+    valorComServicos: document.querySelector("#valorComServicos"),
+    commercialConsumoReal: document.querySelector("#commercialConsumoReal"),
+    commercialValorOriginalFatura: document.querySelector("#commercialValorOriginalFatura"),
+    valorConcessionariaComCreditos: document.querySelector("#commercialValorConcessionariaComCreditos"),
+    tarifaSunprime: document.querySelector("#commercialTarifaSunprime"),
     buscaCliente: document.querySelector("#buscaCliente"),
     salvarCliente: document.querySelector("#salvarCliente"),
     novoCliente: document.querySelector("#novoCliente"),
@@ -57,6 +61,7 @@ const elements = {
     gerarPdf: document.querySelector("#gerarPdf"),
     tabButtons: [...document.querySelectorAll("[data-tab-button]")],
     tabSections: [...document.querySelectorAll("[data-tab-section]")],
+    tabControls: [...document.querySelectorAll("[data-tab-control]")],
     reportCliente: document.querySelector("#reportCliente"),
     reportCodigo: document.querySelector("#reportCodigo"),
     reportEndereco: document.querySelector("#reportEndereco"),
@@ -70,10 +75,13 @@ const elements = {
     reportLinhaComCreditos: document.querySelector("#reportLinhaComCreditos"),
     reportLinhaEconomia: document.querySelector("#reportLinhaEconomia"),
     reportPagamentoEmpresa: document.querySelector("#reportPagamentoEmpresa"),
-    reportRanking: document.querySelector("#reportRanking"),
+    reportIndicadores: document.querySelector("#reportIndicadores"),
     reportHistorico: document.querySelector("#reportHistorico"),
+    relatorioConsumo: document.querySelector("#relatorioConsumo"),
+    relatorioSemServicos: document.querySelector("#relatorioSemServicos"),
+    relatorioComServicos: document.querySelector("#relatorioComServicos"),
+    relatorioEconomia: document.querySelector("#relatorioEconomia"),
     listaUnidades: document.querySelector("#listaUnidades"),
-    resultadoRateio: document.querySelector("#resultadoRateio"),
     unidadeTemplate: document.querySelector("#unidadeTemplate")
 };
 
@@ -167,6 +175,24 @@ function valorKWhAtual() {
 function tarifaSunprimeAtual() {
     const valor = parseNumero(state.tarifaSunprime);
     return valor > 0 ? valor : 0.68891;
+}
+
+function resumoRelatorioMensal() {
+    const consumoReal = parseNumero(state.consumoReal);
+    const valorOriginal = parseNumero(state.valorOriginalFatura);
+    const valorComServicos = parseNumero(state.valorComServicos);
+    const economia = Math.max(valorOriginal - valorComServicos, 0);
+    const tarifaOriginal = consumoReal > 0 ? valorOriginal / consumoReal : 0;
+    const tarifaFinal = consumoReal > 0 ? valorComServicos / consumoReal : 0;
+
+    return {
+        consumoReal,
+        valorOriginal,
+        valorComServicos,
+        economia,
+        tarifaOriginal,
+        tarifaFinal
+    };
 }
 
 function clientesFiltrados() {
@@ -276,44 +302,8 @@ function renderLista(distribuicao) {
     restoreActiveField();
 }
 
-function renderResultado(distribuicao) {
-    elements.resultadoRateio.innerHTML = "";
-
-    if (!distribuicao.length) {
-        elements.resultadoRateio.innerHTML = '<div class="empty-state">Nenhuma unidade cadastrada.</div>';
-        return;
-    }
-
-    const ranking = [...distribuicao].sort((a, b) => b.percentualGeracaoTotal - a.percentualGeracaoTotal);
-
-    ranking.forEach((item, index) => {
-        const article = document.createElement("article");
-        article.className = "result-item";
-
-        const top = document.createElement("div");
-        top.className = "result-top";
-
-        const nome = document.createElement("span");
-        nome.className = "result-name";
-        nome.textContent = `${index + 1}. ${item.nome}`;
-
-        const energia = document.createElement("span");
-        energia.className = "result-energy";
-        energia.textContent = formatarPercentual(item.percentualGeracaoTotal);
-
-        const meta = document.createElement("div");
-        meta.className = "result-meta";
-        meta.textContent = `Media: ${formatarNumero(item.media)} kWh | Com creditos: ${formatarMoeda(item.valorComCreditos)} | Sem creditos: ${formatarMoeda(item.valorSemCreditos)} | Economia: ${formatarMoeda(item.economia)}`;
-
-        top.append(nome, energia);
-        article.append(top, meta);
-        elements.resultadoRateio.appendChild(article);
-    });
-}
-
 function snapshotAtual(distribuicao) {
-    const valorComCreditos = distribuicao.reduce((acc, item) => acc + item.valorComCreditos, 0);
-    const valorSemCreditos = distribuicao.reduce((acc, item) => acc + item.valorSemCreditos, 0);
+    const relatorioMensal = resumoRelatorioMensal();
     return {
         nomeCliente: state.nomeCliente.trim(),
         codigoCliente: state.codigoCliente.trim(),
@@ -323,13 +313,15 @@ function snapshotAtual(distribuicao) {
         valorKWh: state.valorKWh,
         consumoReal: state.consumoReal,
         valorOriginalFatura: state.valorOriginalFatura,
+        valorComServicos: state.valorComServicos,
         valorConcessionariaComCreditos: state.valorConcessionariaComCreditos,
         tarifaSunprime: state.tarifaSunprime,
         unidades: state.unidades.map((unidade) => ({ ...unidade })),
         resumo: {
-            valorComCreditos,
-            valorSemCreditos,
-            economia: Math.max(valorSemCreditos - valorComCreditos, 0)
+            consumoReal: relatorioMensal.consumoReal,
+            valorComServicos: relatorioMensal.valorComServicos,
+            valorOriginal: relatorioMensal.valorOriginal,
+            economia: relatorioMensal.economia
         }
     };
 }
@@ -345,6 +337,7 @@ function preencherCliente(cliente) {
     state.valorKWh = snapshot.valorKWh || "1,17";
     state.consumoReal = snapshot.consumoReal || "";
     state.valorOriginalFatura = snapshot.valorOriginalFatura || "";
+    state.valorComServicos = snapshot.valorComServicos || "";
     state.valorConcessionariaComCreditos = snapshot.valorConcessionariaComCreditos || "";
     state.tarifaSunprime = snapshot.tarifaSunprime || "0,68891";
     state.unidades = snapshot.unidades?.length ? snapshot.unidades.map((unidade) => ({ ...unidade })) : [{ id: uid(), nome: "", media: "" }];
@@ -428,6 +421,7 @@ function novoCliente() {
     state.valorKWh = "1,17";
     state.consumoReal = "";
     state.valorOriginalFatura = "";
+    state.valorComServicos = "";
     state.valorConcessionariaComCreditos = "";
     state.tarifaSunprime = "0,68891";
     state.unidades = [{ id: uid(), nome: "", media: "" }];
@@ -499,45 +493,42 @@ function formatarData(dataIso) {
 
 function renderReport(distribuicao) {
     const hoje = new Intl.DateTimeFormat("pt-BR").format(new Date());
-    const consumoTotal = distribuicao.reduce((acc, item) => acc + item.media, 0);
-    const valorComCreditos = distribuicao.reduce((acc, item) => acc + item.valorComCreditos, 0);
-    const valorSemCreditos = distribuicao.reduce((acc, item) => acc + item.valorSemCreditos, 0);
-    const economia = Math.max(valorSemCreditos - valorComCreditos, 0);
-    const ranking = [...distribuicao].sort((a, b) => b.percentualGeracaoTotal - a.percentualGeracaoTotal);
+    const relatorioMensal = resumoRelatorioMensal();
 
     elements.reportCliente.textContent = state.nomeCliente.trim() || "Cliente nao informado";
     elements.reportCodigo.textContent = `Codigo do cliente: ${state.codigoCliente.trim() || "-"}`;
     elements.reportEndereco.textContent = `Endereco da unidade consumidora: ${state.enderecoUnidade.trim() || "-"}`;
     elements.reportEmissao.textContent = hoje;
     elements.reportVencimento.textContent = formatarData(state.vencimentoFatura);
-    elements.reportConsumo.textContent = `${formatarNumero(consumoTotal)} kWh`;
-    elements.reportSemCreditos.textContent = formatarMoeda(valorSemCreditos);
-    elements.reportComCreditos.textContent = formatarMoeda(valorComCreditos);
-    elements.reportEconomia.textContent = formatarMoeda(economia);
-    elements.reportLinhaSemCreditos.textContent = formatarMoeda(valorSemCreditos);
-    elements.reportLinhaComCreditos.textContent = formatarMoeda(valorComCreditos);
-    elements.reportLinhaEconomia.textContent = formatarMoeda(economia);
-    elements.reportPagamentoEmpresa.textContent = formatarMoeda(valorComCreditos);
-    elements.reportRanking.innerHTML = "";
+    elements.reportConsumo.textContent = `${formatarNumero(relatorioMensal.consumoReal)} kWh`;
+    elements.reportSemCreditos.textContent = formatarMoeda(relatorioMensal.valorOriginal);
+    elements.reportComCreditos.textContent = formatarMoeda(relatorioMensal.valorComServicos);
+    elements.reportEconomia.textContent = formatarMoeda(relatorioMensal.economia);
+    elements.reportLinhaSemCreditos.textContent = formatarMoeda(relatorioMensal.valorOriginal);
+    elements.reportLinhaComCreditos.textContent = formatarMoeda(relatorioMensal.valorComServicos);
+    elements.reportLinhaEconomia.textContent = formatarMoeda(relatorioMensal.economia);
+    elements.reportPagamentoEmpresa.textContent = formatarMoeda(relatorioMensal.valorComServicos);
+    elements.reportIndicadores.innerHTML = "";
     elements.reportHistorico.innerHTML = "";
 
-    if (!ranking.length) {
-        elements.reportRanking.innerHTML = '<div class="empty-state">Nenhuma unidade cadastrada para gerar o relatorio.</div>';
-        return;
-    }
+    const indicadores = [
+        ["Consumo real", `${formatarNumero(relatorioMensal.consumoReal)} kWh`],
+        ["Tarifa original", `${formatarMoeda(relatorioMensal.tarifaOriginal)}/kWh`],
+        ["Tarifa final", `${formatarMoeda(relatorioMensal.tarifaFinal)}/kWh`]
+    ];
 
-    ranking.forEach((item, index) => {
+    indicadores.forEach(([titulo, valor], index) => {
         const row = document.createElement("div");
         row.className = "report-ranking-row";
         row.innerHTML = `
             <div class="report-ranking-pos">${index + 1}</div>
             <div class="report-ranking-meta">
-                <strong>${item.nome}</strong>
-                <span>Media: ${formatarNumero(item.media)} kWh</span>
+                <strong>${titulo}</strong>
+                <span>Indicador automatico do periodo salvo</span>
             </div>
-            <div class="report-ranking-value">${formatarPercentual(item.percentualGeracaoTotal)}</div>
+            <div class="report-ranking-value">${valor}</div>
         `;
-        elements.reportRanking.appendChild(row);
+        elements.reportIndicadores.appendChild(row);
     });
 
     const clienteAtual = state.clientesSalvos.find((cliente) => cliente.id === state.clienteSelecionadoId);
@@ -556,7 +547,7 @@ function renderReport(distribuicao) {
                 <div class="report-ranking-pos">${index + 1}</div>
                 <div class="report-ranking-meta">
                     <strong>${new Intl.DateTimeFormat("pt-BR", { dateStyle: "short", timeStyle: "short" }).format(new Date(item.createdAt))}</strong>
-                    <span>Com creditos: ${formatarMoeda(item.snapshot.resumo.valorComCreditos)} | Sem creditos: ${formatarMoeda(item.snapshot.resumo.valorSemCreditos)}</span>
+                    <span>Com servicos: ${formatarMoeda(item.snapshot.resumo.valorComServicos || 0)} | Sem servicos: ${formatarMoeda(item.snapshot.resumo.valorOriginal || 0)}</span>
                 </div>
                 <div class="report-ranking-value">${formatarMoeda(item.snapshot.resumo.economia)}</div>
             `;
@@ -572,10 +563,27 @@ function renderTabs() {
     elements.tabSections.forEach((section) => {
         section.hidden = section.dataset.tabSection !== state.abaAtual;
     });
+
+    elements.tabControls.forEach((control) => {
+        control.hidden = control.dataset.tabControl !== state.abaAtual;
+    });
+}
+
+function renderRelatorioMensal() {
+    const relatorioMensal = resumoRelatorioMensal();
+
+    if (elements.consumoReal) elements.consumoReal.value = state.consumoReal;
+    if (elements.valorOriginalFatura) elements.valorOriginalFatura.value = state.valorOriginalFatura;
+    if (elements.valorComServicos) elements.valorComServicos.value = state.valorComServicos;
+
+    elements.relatorioConsumo.textContent = `${formatarNumero(relatorioMensal.consumoReal)} kWh`;
+    elements.relatorioSemServicos.textContent = formatarMoeda(relatorioMensal.valorOriginal);
+    elements.relatorioComServicos.textContent = formatarMoeda(relatorioMensal.valorComServicos);
+    elements.relatorioEconomia.textContent = formatarMoeda(relatorioMensal.economia);
 }
 
 function renderCommercial() {
-    if (!elements.consumoReal) return;
+    if (!elements.commercialConsumoReal) return;
 
     const consumoReal = parseNumero(state.consumoReal);
     const valorOriginal = parseNumero(state.valorOriginalFatura);
@@ -585,8 +593,8 @@ function renderCommercial() {
     const economia = Math.max(valorOriginal - (valorConcessionaria + valorSunprime), 0);
     const tarifaSemCreditos = consumoReal > 0 ? valorOriginal / consumoReal : 0;
 
-    elements.consumoReal.value = state.consumoReal;
-    elements.valorOriginalFatura.value = state.valorOriginalFatura;
+    elements.commercialConsumoReal.value = state.consumoReal;
+    elements.commercialValorOriginalFatura.value = state.valorOriginalFatura;
     elements.valorConcessionariaComCreditos.value = state.valorConcessionariaComCreditos;
     elements.tarifaSunprime.value = state.tarifaSunprime;
     elements.commercialSemCreditos.textContent = formatarMoeda(valorOriginal);
@@ -621,8 +629,8 @@ function render() {
     renderResumo(distribuicao);
     renderClientesSalvos();
     renderLista(distribuicao);
-    renderResultado(distribuicao);
     renderFeedback(distribuicao);
+    renderRelatorioMensal();
     renderReport(distribuicao);
     renderCommercial();
     renderTabs();
@@ -689,6 +697,13 @@ elements.valorKWh.addEventListener("input", (event) => {
     render();
 });
 
+if (elements.commercialConsumoReal) {
+    elements.commercialConsumoReal.addEventListener("input", (event) => {
+        state.consumoReal = event.target.value;
+        render();
+    });
+}
+
 if (elements.consumoReal) {
     elements.consumoReal.addEventListener("input", (event) => {
         state.consumoReal = event.target.value;
@@ -696,9 +711,23 @@ if (elements.consumoReal) {
     });
 }
 
+if (elements.commercialValorOriginalFatura) {
+    elements.commercialValorOriginalFatura.addEventListener("input", (event) => {
+        state.valorOriginalFatura = event.target.value;
+        render();
+    });
+}
+
 if (elements.valorOriginalFatura) {
     elements.valorOriginalFatura.addEventListener("input", (event) => {
         state.valorOriginalFatura = event.target.value;
+        render();
+    });
+}
+
+if (elements.valorComServicos) {
+    elements.valorComServicos.addEventListener("input", (event) => {
+        state.valorComServicos = event.target.value;
         render();
     });
 }
