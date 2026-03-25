@@ -2,6 +2,8 @@ const initialUnits = [
     { id: crypto.randomUUID(), nome: "", media: "" }
 ];
 const STORAGE_KEY = "sunprime-clientes-v1";
+const TARIFA_RELATORIO_SEM_SUNPRIME = 1.359;
+const TARIFA_RELATORIO_COM_SUNPRIME = 0.689;
 const state = {
     abaAtual: "calculadora",
     buscaCliente: "",
@@ -180,8 +182,8 @@ function tarifaSunprimeAtual() {
 
 function resumoRelatorioMensal() {
     const consumoReal = parseNumero(state.consumoReal);
-    const valorOriginal = parseNumero(state.valorOriginalFatura);
-    const valorComServicos = parseNumero(state.valorComServicos);
+    const valorOriginal = consumoReal * TARIFA_RELATORIO_SEM_SUNPRIME;
+    const valorComServicos = consumoReal * TARIFA_RELATORIO_COM_SUNPRIME;
     const economia = Math.max(valorOriginal - valorComServicos, 0);
     const tarifaOriginal = consumoReal > 0 ? valorOriginal / consumoReal : 0;
     const tarifaFinal = consumoReal > 0 ? valorComServicos / consumoReal : 0;
@@ -313,8 +315,8 @@ function snapshotAtual(distribuicao) {
         geracaoTotal: state.geracaoTotal,
         valorKWh: state.valorKWh,
         consumoReal: state.consumoReal,
-        valorOriginalFatura: state.valorOriginalFatura,
-        valorComServicos: state.valorComServicos,
+        valorOriginalFatura: `${relatorioMensal.valorOriginal}`,
+        valorComServicos: `${relatorioMensal.valorComServicos}`,
         valorConcessionariaComCreditos: state.valorConcessionariaComCreditos,
         tarifaSunprime: state.tarifaSunprime,
         unidades: state.unidades.map((unidade) => ({ ...unidade })),
@@ -329,8 +331,8 @@ function snapshotAtual(distribuicao) {
 
 function resumoDoSnapshot(snapshot) {
     const consumoReal = snapshot?.resumo?.consumoReal ?? parseNumero(snapshot?.consumoReal);
-    const valorOriginal = snapshot?.resumo?.valorOriginal ?? parseNumero(snapshot?.valorOriginalFatura);
-    const valorComServicos = snapshot?.resumo?.valorComServicos ?? parseNumero(snapshot?.valorComServicos);
+    const valorOriginal = snapshot?.resumo?.valorOriginal ?? (consumoReal * TARIFA_RELATORIO_SEM_SUNPRIME);
+    const valorComServicos = snapshot?.resumo?.valorComServicos ?? (consumoReal * TARIFA_RELATORIO_COM_SUNPRIME);
     const economia = snapshot?.resumo?.economia ?? Math.max(valorOriginal - valorComServicos, 0);
     const tarifaOriginal = consumoReal > 0 ? valorOriginal / consumoReal : 0;
     const tarifaFinal = consumoReal > 0 ? valorComServicos / consumoReal : 0;
@@ -601,8 +603,8 @@ function renderRelatorioMensal() {
     const relatorioMensal = resumoRelatorioMensal();
 
     if (elements.consumoReal) elements.consumoReal.value = state.consumoReal;
-    if (elements.valorOriginalFatura) elements.valorOriginalFatura.value = state.valorOriginalFatura;
-    if (elements.valorComServicos) elements.valorComServicos.value = state.valorComServicos;
+    if (elements.valorOriginalFatura) elements.valorOriginalFatura.value = relatorioMensal.consumoReal > 0 ? formatarNumero(relatorioMensal.valorOriginal) : "";
+    if (elements.valorComServicos) elements.valorComServicos.value = relatorioMensal.consumoReal > 0 ? formatarNumero(relatorioMensal.valorComServicos) : "";
 
     elements.relatorioConsumo.textContent = `${formatarNumero(relatorioMensal.consumoReal)} kWh`;
     elements.relatorioSemServicos.textContent = formatarMoeda(relatorioMensal.valorOriginal);

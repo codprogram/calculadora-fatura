@@ -31,6 +31,8 @@ private struct UnidadeEditavel: Identifiable {
 
 struct ContentView: View {
     private let valorKWhSemCreditos = 1.36
+    private let tarifaOriginalRelatorio = 1.359
+    private let tarifaComServicosRelatorio = 0.689
     @State private var unidades: [UnidadeEditavel] = [
         UnidadeEditavel(nome: "", mediaTexto: "")
     ]
@@ -76,6 +78,14 @@ struct ContentView: View {
         parseNumero(valorComServicosTexto)
     }
 
+    var valorOriginalRelatorioCliente: Double {
+        consumoReal * tarifaOriginalRelatorio
+    }
+
+    var valorComServicosRelatorioCliente: Double {
+        consumoReal * tarifaComServicosRelatorio
+    }
+
     var valorConcessionariaComCreditos: Double {
         parseNumero(valorConcessionariaComCreditosTexto)
     }
@@ -90,7 +100,7 @@ struct ContentView: View {
     }
 
     var economiaRelatorioCliente: Double {
-        max(valorOriginalFatura - valorComServicos, 0)
+        max(valorOriginalRelatorioCliente - valorComServicosRelatorioCliente, 0)
     }
 
     var tarifaComServicosEfetiva: Double {
@@ -98,13 +108,14 @@ struct ContentView: View {
         return valorComServicos / consumoReal
     }
 
-    var statusRelatorioCliente: String {
-        if consumoReal <= 0 || valorOriginalFatura <= 0 {
-            return "Informe consumo real e valor original da fatura para montar o relatorio mensal."
-        }
+    var tarifaComServicosEfetivaRelatorioCliente: Double {
+        guard consumoReal > 0 else { return tarifaComServicosRelatorio }
+        return valorComServicosRelatorioCliente / consumoReal
+    }
 
-        if valorComServicos <= 0 {
-            return "Informe o valor final pago com os servicos da Sunprime para fechar o comparativo."
+    var statusRelatorioCliente: String {
+        if consumoReal <= 0 {
+            return "Informe o consumo real para montar o relatorio mensal."
         }
 
         return "Relatorio mensal pronto. Os dados podem ser reaproveitados no proximo periodo como historico do cliente."
@@ -438,6 +449,26 @@ struct ContentView: View {
         .frame(maxWidth: .infinity, alignment: .leading)
     }
 
+    private func campoTextoSomenteLeitura(titulo: String, valor: String) -> some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text(titulo)
+                .font(.system(size: 12, weight: .semibold, design: .rounded))
+                .foregroundStyle(corSecundaria)
+
+            Text(valor)
+                .font(.system(size: 16, weight: .bold, design: .rounded))
+                .foregroundStyle(corCampo)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.horizontal, 12)
+                .padding(.vertical, 10)
+                .background(
+                    RoundedRectangle(cornerRadius: 14, style: .continuous)
+                        .fill(Color.white.opacity(0.92))
+                )
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
     private var listaUnidades: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Unidades")
@@ -539,27 +570,27 @@ struct ContentView: View {
 
             Text(statusRelatorioCliente)
                 .font(.system(size: 12, weight: .semibold, design: .rounded))
-                .foregroundStyle(consumoReal > 0 && valorOriginalFatura > 0 && valorComServicos > 0 ? Color(red: 0.11, green: 0.47, blue: 0.38) : Color(red: 0.68, green: 0.39, blue: 0.12))
+                .foregroundStyle(consumoReal > 0 ? Color(red: 0.11, green: 0.47, blue: 0.38) : Color(red: 0.68, green: 0.39, blue: 0.12))
 
             HStack(spacing: 12) {
                 campoTexto(titulo: "Consumo real (kWh)", texto: $consumoRealTexto, placeholder: "Ex.: 1242")
-                campoTexto(titulo: "Valor original da fatura", texto: $valorOriginalFaturaTexto, placeholder: "Ex.: 1687,89")
+                campoTextoSomenteLeitura(titulo: "Valor sem a Sunprime", valor: formatarMoeda(valorOriginalRelatorioCliente))
             }
 
             HStack(spacing: 12) {
-                campoTexto(titulo: "Valor final com nossos servicos", texto: $valorComServicosTexto, placeholder: "Ex.: 1394,98")
+                campoTextoSomenteLeitura(titulo: "Valor com a Sunprime", valor: formatarMoeda(valorComServicosRelatorioCliente))
             }
 
             HStack(spacing: 10) {
                 metricaCard(titulo: "Consumo real", valor: "\(formatarNumero(consumoReal)) kWh")
-                metricaCard(titulo: "Sem nossos servicos", valor: formatarMoeda(valorOriginalFatura))
-                metricaCard(titulo: "Com nossos servicos", valor: formatarMoeda(valorComServicos))
+                metricaCard(titulo: "Sem nossos servicos", valor: formatarMoeda(valorOriginalRelatorioCliente))
+                metricaCard(titulo: "Com nossos servicos", valor: formatarMoeda(valorComServicosRelatorioCliente))
                 metricaCard(titulo: "Economia", valor: formatarMoeda(economiaRelatorioCliente))
             }
 
             HStack(spacing: 10) {
-                metricaCard(titulo: "Tarifa original", valor: "\(formatarMoeda(tarifaSemCreditosEfetiva))/kWh")
-                metricaCard(titulo: "Tarifa final", valor: "\(formatarMoeda(tarifaComServicosEfetiva))/kWh")
+                metricaCard(titulo: "Tarifa original", valor: "\(formatarMoeda(tarifaOriginalRelatorio))/kWh")
+                metricaCard(titulo: "Tarifa final", valor: "\(formatarMoeda(tarifaComServicosEfetivaRelatorioCliente))/kWh")
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)

@@ -198,6 +198,10 @@ input {
     margin-top: 16px;
 }
 
+.layout[data-tab-section="relatorio"] {
+    grid-template-columns: 1fr;
+}
+
 .panel {
     padding: 22px;
 }
