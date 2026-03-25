@@ -136,10 +136,37 @@ async function saveClient(clientId, snapshot) {
         clientRow = inserted[0];
     }
 
-    await sql`
-        INSERT INTO reports (client_id, snapshot)
-        VALUES (${clientRow.id}, ${JSON.stringify(snapshot)}::jsonb)
-    `;
+    const reportPayload = JSON.stringify(snapshot);
+
+    if (dueDate) {
+        const updatedReport = await sql`
+            UPDATE reports
+            SET
+                snapshot = ${reportPayload}::jsonb,
+                created_at = NOW()
+            WHERE id = (
+                SELECT id
+                FROM reports
+                WHERE client_id = ${clientRow.id}
+                  AND COALESCE(snapshot->>'vencimentoFatura', '') = ${dueDate}
+                ORDER BY created_at DESC
+                LIMIT 1
+            )
+            RETURNING id
+        `;
+
+        if (!updatedReport.length) {
+            await sql`
+                INSERT INTO reports (client_id, snapshot)
+                VALUES (${clientRow.id}, ${reportPayload}::jsonb)
+            `;
+        }
+    } else {
+        await sql`
+            INSERT INTO reports (client_id, snapshot)
+            VALUES (${clientRow.id}, ${reportPayload}::jsonb)
+        `;
+    }
 
     const rows = await listClients(snapshot.nomeCliente);
     return rows.find((row) => row.id === clientRow.id);

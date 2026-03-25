@@ -75,7 +75,6 @@ const elements = {
     reportLinhaComCreditos: document.querySelector("#reportLinhaComCreditos"),
     reportLinhaEconomia: document.querySelector("#reportLinhaEconomia"),
     reportPagamentoEmpresa: document.querySelector("#reportPagamentoEmpresa"),
-    reportIndicadores: document.querySelector("#reportIndicadores"),
     reportHistorico: document.querySelector("#reportHistorico"),
     relatorioConsumo: document.querySelector("#relatorioConsumo"),
     relatorioSemServicos: document.querySelector("#relatorioSemServicos"),
@@ -326,6 +325,39 @@ function snapshotAtual(distribuicao) {
     };
 }
 
+function resumoDoSnapshot(snapshot) {
+    const consumoReal = snapshot?.resumo?.consumoReal ?? parseNumero(snapshot?.consumoReal);
+    const valorOriginal = snapshot?.resumo?.valorOriginal ?? parseNumero(snapshot?.valorOriginalFatura);
+    const valorComServicos = snapshot?.resumo?.valorComServicos ?? parseNumero(snapshot?.valorComServicos);
+    const economia = snapshot?.resumo?.economia ?? Math.max(valorOriginal - valorComServicos, 0);
+    const tarifaOriginal = consumoReal > 0 ? valorOriginal / consumoReal : 0;
+    const tarifaFinal = consumoReal > 0 ? valorComServicos / consumoReal : 0;
+
+    return {
+        consumoReal,
+        valorOriginal,
+        valorComServicos,
+        economia,
+        tarifaOriginal,
+        tarifaFinal
+    };
+}
+
+function atualizarHistoricoPorVencimento(historico = [], historicoItem) {
+    const vencimentoAtual = historicoItem.snapshot.vencimentoFatura || "";
+    const indexExistente = historico.findIndex((item) => (item.snapshot?.vencimentoFatura || "") === vencimentoAtual);
+
+    if (indexExistente === -1) {
+        return [...historico, historicoItem];
+    }
+
+    return historico.map((item, index) => (
+        index === indexExistente
+            ? { ...item, createdAt: historicoItem.createdAt, snapshot: historicoItem.snapshot }
+            : item
+    ));
+}
+
 function preencherCliente(cliente) {
     const snapshot = cliente.ultimoSnapshot;
     state.clienteSelecionadoId = cliente.id;
@@ -353,6 +385,11 @@ function salvarClienteAtual() {
         return;
     }
 
+    if (!snapshot.vencimentoFatura) {
+        alert("Informe o vencimento da fatura para incluir esse periodo no historico.");
+        return;
+    }
+
     const historicoItem = {
         id: uid(),
         createdAt: new Date().toISOString(),
@@ -368,7 +405,7 @@ function salvarClienteAtual() {
             codigoCliente: snapshot.codigoCliente,
             ultimoSnapshot: snapshot,
             updatedAt: historicoItem.createdAt,
-            historico: [...(atual.historico || []), historicoItem]
+            historico: atualizarHistoricoPorVencimento(atual.historico || [], historicoItem)
         };
     } else {
         const novo = {
@@ -394,6 +431,11 @@ async function salvarClienteAtualRemoto() {
 
     if (!snapshot.nomeCliente) {
         alert("Informe o nome do cliente antes de salvar.");
+        return;
+    }
+
+    if (!snapshot.vencimentoFatura) {
+        alert("Informe o vencimento da fatura para incluir esse periodo no historico.");
         return;
     }
 
@@ -508,28 +550,7 @@ function renderReport(distribuicao) {
     elements.reportLinhaComCreditos.textContent = formatarMoeda(relatorioMensal.valorComServicos);
     elements.reportLinhaEconomia.textContent = formatarMoeda(relatorioMensal.economia);
     elements.reportPagamentoEmpresa.textContent = formatarMoeda(relatorioMensal.valorComServicos);
-    elements.reportIndicadores.innerHTML = "";
     elements.reportHistorico.innerHTML = "";
-
-    const indicadores = [
-        ["Consumo real", `${formatarNumero(relatorioMensal.consumoReal)} kWh`],
-        ["Tarifa original", `${formatarMoeda(relatorioMensal.tarifaOriginal)}/kWh`],
-        ["Tarifa final", `${formatarMoeda(relatorioMensal.tarifaFinal)}/kWh`]
-    ];
-
-    indicadores.forEach(([titulo, valor], index) => {
-        const row = document.createElement("div");
-        row.className = "report-ranking-row";
-        row.innerHTML = `
-            <div class="report-ranking-pos">${index + 1}</div>
-            <div class="report-ranking-meta">
-                <strong>${titulo}</strong>
-                <span>Indicador automatico do periodo salvo</span>
-            </div>
-            <div class="report-ranking-value">${valor}</div>
-        `;
-        elements.reportIndicadores.appendChild(row);
-    });
 
     const clienteAtual = state.clientesSalvos.find((cliente) => cliente.id === state.clienteSelecionadoId);
     if (!clienteAtual || !(clienteAtual.historico || []).length) {
@@ -541,15 +562,18 @@ function renderReport(distribuicao) {
         .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
         .slice(0, 6)
         .forEach((item, index) => {
+            const resumo = resumoDoSnapshot(item.snapshot);
             const row = document.createElement("div");
             row.className = "report-ranking-row";
             row.innerHTML = `
                 <div class="report-ranking-pos">${index + 1}</div>
                 <div class="report-ranking-meta">
-                    <strong>${new Intl.DateTimeFormat("pt-BR", { dateStyle: "short", timeStyle: "short" }).format(new Date(item.createdAt))}</strong>
-                    <span>Com servicos: ${formatarMoeda(item.snapshot.resumo.valorComServicos || 0)} | Sem servicos: ${formatarMoeda(item.snapshot.resumo.valorOriginal || 0)}</span>
+                    <strong>Vencimento ${formatarData(item.snapshot?.vencimentoFatura)}</strong>
+                    <span>Salvo em ${new Intl.DateTimeFormat("pt-BR", { dateStyle: "short", timeStyle: "short" }).format(new Date(item.createdAt))}</span>
+                    <span>Sem servicos: ${formatarMoeda(resumo.valorOriginal)} | Tarifa original: ${formatarMoeda(resumo.tarifaOriginal)}/kWh</span>
+                    <span>Com servicos: ${formatarMoeda(resumo.valorComServicos)} | Tarifa final: ${formatarMoeda(resumo.tarifaFinal)}/kWh</span>
                 </div>
-                <div class="report-ranking-value">${formatarMoeda(item.snapshot.resumo.economia)}</div>
+                <div class="report-ranking-value">${formatarMoeda(resumo.valorComServicos)}</div>
             `;
             elements.reportHistorico.appendChild(row);
         });
