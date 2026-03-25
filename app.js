@@ -71,9 +71,11 @@ const elements = {
     reportSemCreditos: document.querySelector("#reportSemCreditos"),
     reportComCreditos: document.querySelector("#reportComCreditos"),
     reportEconomia: document.querySelector("#reportEconomia"),
-    reportLinhaSemCreditos: document.querySelector("#reportLinhaSemCreditos"),
-    reportLinhaComCreditos: document.querySelector("#reportLinhaComCreditos"),
-    reportLinhaEconomia: document.querySelector("#reportLinhaEconomia"),
+    reportAnalisePrincipal: document.querySelector("#reportAnalisePrincipal"),
+    reportInsightConsumo: document.querySelector("#reportInsightConsumo"),
+    reportInsightTarifaOriginal: document.querySelector("#reportInsightTarifaOriginal"),
+    reportInsightTarifaFinal: document.querySelector("#reportInsightTarifaFinal"),
+    reportInsightEconomia: document.querySelector("#reportInsightEconomia"),
     reportPagamentoEmpresa: document.querySelector("#reportPagamentoEmpresa"),
     reportHistorico: document.querySelector("#reportHistorico"),
     relatorioConsumo: document.querySelector("#relatorioConsumo"),
@@ -546,9 +548,11 @@ function renderReport(distribuicao) {
     elements.reportSemCreditos.textContent = formatarMoeda(relatorioMensal.valorOriginal);
     elements.reportComCreditos.textContent = formatarMoeda(relatorioMensal.valorComServicos);
     elements.reportEconomia.textContent = formatarMoeda(relatorioMensal.economia);
-    elements.reportLinhaSemCreditos.textContent = formatarMoeda(relatorioMensal.valorOriginal);
-    elements.reportLinhaComCreditos.textContent = formatarMoeda(relatorioMensal.valorComServicos);
-    elements.reportLinhaEconomia.textContent = formatarMoeda(relatorioMensal.economia);
+    elements.reportAnalisePrincipal.textContent = `Neste periodo, o cliente teria um custo original de ${formatarMoeda(relatorioMensal.valorOriginal)} e passa a ter um fechamento de ${formatarMoeda(relatorioMensal.valorComServicos)} com os servicos da Sunprime, gerando economia estimada de ${formatarMoeda(relatorioMensal.economia)}.`;
+    elements.reportInsightConsumo.textContent = `${formatarNumero(relatorioMensal.consumoReal)} kWh`;
+    elements.reportInsightTarifaOriginal.textContent = `${formatarMoeda(relatorioMensal.tarifaOriginal)}/kWh`;
+    elements.reportInsightTarifaFinal.textContent = `${formatarMoeda(relatorioMensal.tarifaFinal)}/kWh`;
+    elements.reportInsightEconomia.textContent = formatarMoeda(relatorioMensal.economia);
     elements.reportPagamentoEmpresa.textContent = formatarMoeda(relatorioMensal.valorComServicos);
     elements.reportHistorico.innerHTML = "";
 

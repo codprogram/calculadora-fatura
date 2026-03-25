@@ -264,20 +264,31 @@
 
             <div class="report-sections">
                 <section class="report-card-block">
-                    <h3>Resumo financeiro</h3>
-                    <div class="report-lines">
-                        <div class="report-line">
-                            <span>Fatura original sem nossos servicos</span>
-                            <strong id="reportLinhaSemCreditos">R$ 0,00</strong>
-                        </div>
-                        <div class="report-line">
-                            <span>Valor final pago com nossos servicos</span>
-                            <strong id="reportLinhaComCreditos">R$ 0,00</strong>
-                        </div>
-                        <div class="report-line">
-                            <span>Economia estimada no periodo</span>
-                            <strong id="reportLinhaEconomia">R$ 0,00</strong>
-                        </div>
+                    <h3>Leitura do periodo</h3>
+                    <p id="reportAnalisePrincipal" class="report-note">
+                        O cliente apresenta comparativo financeiro entre o cenario original da concessionaria e o valor final com os servicos da Sunprime.
+                    </p>
+                    <div class="report-insights">
+                        <article class="report-insight">
+                            <span class="report-insight-label">Consumo analisado</span>
+                            <strong id="reportInsightConsumo">0,00 kWh</strong>
+                            <p>Volume de energia considerado para este fechamento.</p>
+                        </article>
+                        <article class="report-insight">
+                            <span class="report-insight-label">Tarifa original</span>
+                            <strong id="reportInsightTarifaOriginal">R$ 0,00/kWh</strong>
+                            <p>Referência média da fatura sem contratação dos serviços.</p>
+                        </article>
+                        <article class="report-insight">
+                            <span class="report-insight-label">Tarifa final</span>
+                            <strong id="reportInsightTarifaFinal">R$ 0,00/kWh</strong>
+                            <p>Referência média após a aplicação dos serviços e créditos.</p>
+                        </article>
+                        <article class="report-insight">
+                            <span class="report-insight-label">Economia projetada</span>
+                            <strong id="reportInsightEconomia">R$ 0,00</strong>
+                            <p>Diferença estimada entre o cenário original e o fechamento atual.</p>
+                        </article>
                     </div>
                 </section>
 

@@ -535,6 +535,43 @@ input {
     gap: 12px;
 }
 
+.report-insights {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.report-insight {
+    padding: 16px;
+    border-radius: 18px;
+    background: linear-gradient(180deg, rgba(255, 247, 238, 0.92), rgba(255, 255, 255, 0.96));
+    border: 1px solid rgba(239, 139, 30, 0.16);
+}
+
+.report-insight-label {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.report-insight strong {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 1.2rem;
+    color: var(--ink);
+}
+
+.report-insight p {
+    margin: 0;
+    color: var(--muted);
+    line-height: 1.5;
+    font-size: 0.92rem;
+}
+
 .report-line {
     display: flex;
     align-items: center;
@@ -792,6 +829,11 @@ input {
         line-height: 1.35;
     }
 
+    .report-insight p {
+        font-size: 9.5pt;
+        line-height: 1.35;
+    }
+
     .report-meta-box,
     .report-highlight,
     .report-card-block {
@@ -828,6 +870,18 @@ input {
     .report-card-block h3 {
         font-size: 11pt;
         margin-bottom: 3mm;
+    }
+
+    .report-insights {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 3mm;
+    }
+
+    .report-insight {
+        padding: 4mm;
+        border-radius: 4mm;
+        break-inside: avoid;
+        page-break-inside: avoid;
     }
 
     .report-payment-value {
