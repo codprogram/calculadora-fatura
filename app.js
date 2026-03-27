@@ -197,6 +197,10 @@ function valorOuPadrao(texto, padrao) {
     return String(texto || "").trim() || padrao;
 }
 
+function valorKWhLiteral(texto) {
+    return `${valorOuPadrao(texto, "0")} kWh`;
+}
+
 function uid() {
     return crypto.randomUUID();
 }
@@ -818,7 +822,7 @@ function renderPerformance() {
     elements.performanceReportResumo.textContent = valorOuPadrao(state.performanceResumo, "Preencha os dados para montar o resumo do periodo.");
     elements.performanceReportEnergiaConsumida.textContent = `${valorOuPadrao(state.performanceEnergiaConsumida, "0")} kWh`;
     elements.performanceReportEnergiaGerada.textContent = `${valorOuPadrao(state.performanceEnergiaGerada, "0")} kWh`;
-    elements.performanceReportEnergiaCompensada.textContent = `${valorOuPadrao(state.performanceEnergiaCompensada, "0")} kWh`;
+    elements.performanceReportEnergiaCompensada.textContent = valorKWhLiteral(state.performanceEnergiaCompensada);
     elements.performanceReportCreditoAcumulado.textContent = `${valorOuPadrao(state.performanceCreditoAcumulado, "0")} kWh`;
     elements.performanceChartResumo.textContent = "A geracao apresentou comportamento comparado ao consumo ao longo do trimestre analisado.";
     elements.performanceReportDirecionamento.textContent = valorOuPadrao(state.performanceDirecionamento, "Descreva o direcionamento estrategico para este cliente.");
@@ -880,7 +884,7 @@ function gerarAnaliseSunPrime() {
 
 * Energia Gerada: ${formatarNumero(energiaGerada)} kWh
 * Energia Consumida: ${formatarNumero(energiaConsumida)} kWh
-* Energia Compensada: ${formatarNumero(energiaCompensada)} kWh
+* Energia Compensada: ${valorOuPadrao(state.spEnergiaCompensada, "0")} kWh
 * Crédito Acumulado: ${formatarNumero(creditoAcumulado)} kWh
 
 ## ANÁLISE DE DESEMPENHO
@@ -916,7 +920,7 @@ function renderSunPrimeAuto() {
 
     elements.spCardGerada.textContent = `${formatarNumero(parseNumero(state.spEnergiaGerada))} kWh`;
     elements.spCardConsumida.textContent = `${formatarNumero(parseNumero(state.spEnergiaConsumida))} kWh`;
-    elements.spCardCompensada.textContent = `${formatarNumero(parseNumero(state.spEnergiaCompensada))} kWh`;
+    elements.spCardCompensada.textContent = valorKWhLiteral(state.spEnergiaCompensada);
     elements.spCardCredito.textContent = `${formatarNumero(parseNumero(state.spCreditoAcumulado))} kWh`;
 
     elements.spAnalise.textContent = valorOuPadrao(state.spAnalise, "A análise de desempenho será gerada automaticamente a partir dos indicadores energéticos informados.");

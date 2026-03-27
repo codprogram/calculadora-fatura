@@ -1112,6 +1112,7 @@ textarea {
     .layout,
     .feedback-panel,
     .report-shell,
+    .panel,
     .primary-button,
     .secondary-button,
     button,
@@ -1127,7 +1128,11 @@ textarea {
         display: none !important;
     }
 
-    [data-tab-section="performance"] {
+    .performance-panel[data-tab-section="performance"] {
+        display: none !important;
+    }
+
+    .performance-report-shell[data-tab-section="performance"] {
         display: block !important;
     }
 
