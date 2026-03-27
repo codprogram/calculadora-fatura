@@ -62,6 +62,7 @@
             <button class="tab-button" data-tab-button="relatorio" type="button">Cliente + Relatorio</button>
             <button class="tab-button" data-tab-button="comercial" type="button">Relatorio Comercial</button>
             <button class="tab-button" data-tab-button="performance" type="button">Performance</button>
+            <button class="tab-button" data-tab-button="sunprime-auto" type="button">Sun Prime IA</button>
         </section>
 
         <section class="card panel client-panel" data-tab-section="relatorio">
@@ -308,6 +309,105 @@
                     <span>Fechamento</span>
                     <textarea id="performanceConclusao" rows="3" placeholder="Mensagem final do periodo."></textarea>
                 </label>
+            </div>
+        </section>
+
+        <section class="card panel sp-panel" data-tab-section="sunprime-auto">
+            <div class="panel-header sp-panel-header">
+                <div>
+                    <p class="eyebrow">Sun Prime IA</p>
+                    <h2>Gerador Estratégico de Relatório Mensal</h2>
+                    <p>Preencha os indicadores do período e gere automaticamente a leitura estratégica, operacional e executiva para reaproveitar na aba de performance.</p>
+                </div>
+                <div class="sp-action-row">
+                    <button id="spGerarAnalise" class="primary-button" type="button">Gerar análise</button>
+                    <button id="spCopiarTexto" class="secondary-button" type="button">Copiar texto</button>
+                    <button id="spEnviarPerformance" class="secondary-button" type="button">Enviar para Performance</button>
+                </div>
+            </div>
+
+            <div class="sp-layout">
+                <div class="sp-column">
+                    <div class="sp-input-card">
+                        <div class="client-grid">
+                            <label class="field">
+                                <span>Cliente</span>
+                                <input id="spCliente" type="text" placeholder="Ex.: IEADPE Exu">
+                            </label>
+                            <label class="field">
+                                <span>Período</span>
+                                <input id="spPeriodo" type="text" placeholder="Ex.: Março | 2026">
+                            </label>
+                            <label class="field">
+                                <span>Energia gerada</span>
+                                <input id="spEnergiaGerada" type="text" inputmode="decimal" placeholder="815">
+                            </label>
+                            <label class="field">
+                                <span>Energia consumida</span>
+                                <input id="spEnergiaConsumida" type="text" inputmode="decimal" placeholder="584">
+                            </label>
+                            <label class="field">
+                                <span>Energia compensada</span>
+                                <input id="spEnergiaCompensada" type="text" inputmode="decimal" placeholder="100">
+                            </label>
+                            <label class="field">
+                                <span>Crédito acumulado</span>
+                                <input id="spCreditoAcumulado" type="text" inputmode="decimal" placeholder="680">
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="sp-kpi-grid">
+                        <article class="sp-kpi-card">
+                            <span>Energia Gerada</span>
+                            <strong id="spCardGerada">0,00 kWh</strong>
+                        </article>
+                        <article class="sp-kpi-card">
+                            <span>Energia Consumida</span>
+                            <strong id="spCardConsumida">0,00 kWh</strong>
+                        </article>
+                        <article class="sp-kpi-card">
+                            <span>Energia Compensada</span>
+                            <strong id="spCardCompensada">0,00%</strong>
+                        </article>
+                        <article class="sp-kpi-card">
+                            <span>Crédito Acumulado</span>
+                            <strong id="spCardCredito">0,00 kWh</strong>
+                        </article>
+                    </div>
+                </div>
+
+                <div class="sp-column">
+                    <div class="sp-text-grid">
+                        <article class="sp-text-card">
+                            <span class="sp-text-label">Análise de Desempenho</span>
+                            <p id="spAnalise">A leitura estratégica será gerada automaticamente a partir dos indicadores energéticos informados.</p>
+                        </article>
+                        <article class="sp-text-card">
+                            <span class="sp-text-label">Leitura Operacional</span>
+                            <p id="spLeitura">O painel executivo apresentará um resumo operacional claro e corporativo para o período.</p>
+                        </article>
+                        <article class="sp-text-card">
+                            <span class="sp-text-label">Créditos Energéticos</span>
+                            <p id="spCreditos">A interpretação do saldo de créditos será exibida aqui com linguagem pronta para relatório.</p>
+                        </article>
+                        <article class="sp-text-card">
+                            <span class="sp-text-label">Direcionamento Estratégico</span>
+                            <p id="spDirecionamento">As recomendações estratégicas serão geradas com base na relação entre geração, consumo e saldo acumulado.</p>
+                        </article>
+                        <article class="sp-text-card sp-text-card-wide">
+                            <span class="sp-text-label">Conclusão</span>
+                            <p id="spConclusao">A conclusão executiva consolidará o desempenho do sistema como ativo energético estratégico.</p>
+                        </article>
+                    </div>
+
+                    <article class="sp-complete-card">
+                        <span class="sp-text-label">Texto Completo</span>
+                        <pre id="spTextoCompleto" class="sp-complete-text">## INDICADORES ENERGÉTICOS
+
+Preencha os dados e clique em "Gerar análise" para montar automaticamente o texto completo do relatório.</pre>
+                    </article>
+                </div>
             </div>
         </section>
 

@@ -37,6 +37,18 @@ const state = {
     performanceAnalise: "",
     performanceDirecionamento: "",
     performanceConclusao: "",
+    spCliente: "",
+    spPeriodo: "",
+    spEnergiaGerada: "",
+    spEnergiaConsumida: "",
+    spEnergiaCompensada: "",
+    spCreditoAcumulado: "",
+    spAnalise: "",
+    spLeitura: "",
+    spCreditos: "",
+    spDirecionamento: "",
+    spConclusao: "",
+    spTextoCompleto: "",
     unidades: initialUnits
 };
 const VALOR_KWH_SEM_CREDITOS = 1.36;
@@ -76,6 +88,25 @@ const elements = {
     performanceAnalise: document.querySelector("#performanceAnalise"),
     performanceDirecionamento: document.querySelector("#performanceDirecionamento"),
     performanceConclusao: document.querySelector("#performanceConclusao"),
+    spCliente: document.querySelector("#spCliente"),
+    spPeriodo: document.querySelector("#spPeriodo"),
+    spEnergiaGerada: document.querySelector("#spEnergiaGerada"),
+    spEnergiaConsumida: document.querySelector("#spEnergiaConsumida"),
+    spEnergiaCompensada: document.querySelector("#spEnergiaCompensada"),
+    spCreditoAcumulado: document.querySelector("#spCreditoAcumulado"),
+    spGerarAnalise: document.querySelector("#spGerarAnalise"),
+    spCopiarTexto: document.querySelector("#spCopiarTexto"),
+    spEnviarPerformance: document.querySelector("#spEnviarPerformance"),
+    spCardGerada: document.querySelector("#spCardGerada"),
+    spCardConsumida: document.querySelector("#spCardConsumida"),
+    spCardCompensada: document.querySelector("#spCardCompensada"),
+    spCardCredito: document.querySelector("#spCardCredito"),
+    spAnalise: document.querySelector("#spAnalise"),
+    spLeitura: document.querySelector("#spLeitura"),
+    spCreditos: document.querySelector("#spCreditos"),
+    spDirecionamento: document.querySelector("#spDirecionamento"),
+    spConclusao: document.querySelector("#spConclusao"),
+    spTextoCompleto: document.querySelector("#spTextoCompleto"),
     adicionarUnidade: document.querySelector("#adicionarUnidade"),
     totalUnidades: document.querySelector("#totalUnidades"),
     totalDistribuido: document.querySelector("#totalDistribuido"),
@@ -810,6 +841,94 @@ function renderPerformance() {
     renderPerformanceChart();
 }
 
+function gerarAnaliseSunPrime() {
+    const energiaGerada = parseNumero(state.spEnergiaGerada);
+    const energiaConsumida = parseNumero(state.spEnergiaConsumida);
+    const energiaCompensada = parseNumero(state.spEnergiaCompensada);
+    const creditoAcumulado = parseNumero(state.spCreditoAcumulado);
+
+    let analise = "O sistema apresentou comportamento operacional consistente no período, com dados suficientes para leitura estratégica do desempenho energético.";
+    let leitura = "O cenário operacional demonstra estabilidade na relação entre geração, consumo e compensação energética.";
+    let direcionamento = "Recomenda-se manter o acompanhamento mensal e consolidar a leitura histórica para ampliar a previsibilidade energética da unidade.";
+
+    if (energiaGerada > energiaConsumida) {
+        analise = "O sistema operou com geração superior ao consumo, evidenciando desempenho eficiente e formação de excedente energético ao longo do período.";
+        leitura = "A leitura operacional indica sobra energética, com capacidade de geração de valor por meio do aproveitamento técnico dos créditos formados.";
+        direcionamento = "O direcionamento estratégico sugere redistribuição de créditos, expansão para outras unidades beneficiárias ou otimização do aproveitamento energético já disponível.";
+    } else if (energiaGerada === energiaConsumida && energiaGerada > 0) {
+        analise = "O sistema apresentou aderência à demanda atual, com operação estável e compensação energética adequada ao perfil de consumo da unidade.";
+        leitura = "O cenário operacional demonstra equilíbrio entre geração e consumo, com boa correspondência entre a produção fotovoltaica e a necessidade energética.";
+        direcionamento = "O direcionamento estratégico recomenda manutenção do acompanhamento e revisão periódica do crescimento de carga para preservar o equilíbrio do sistema.";
+    } else if (energiaGerada < energiaConsumida) {
+        analise = "A demanda da unidade permaneceu superior à capacidade de geração observada no período, indicando necessidade maior de suporte complementar da rede elétrica.";
+        leitura = "A leitura operacional aponta cenário de equilíbrio pressionado ou defasagem energética, com geração relevante, porém insuficiente para cobertura integral da demanda.";
+        direcionamento = "O direcionamento estratégico recomenda avaliar ampliação do sistema, rebalanceamento de créditos ou readequação do perfil de consumo para elevar a eficiência global.";
+    }
+
+    const creditos = creditoAcumulado > 0
+        ? "Há saldo energético acumulado disponível para compensações futuras, fortalecendo a flexibilidade operacional e ampliando o potencial de gestão de consumo da unidade."
+        : "Não há saldo acumulado relevante no período, indicando que o volume energético compensado foi direcionado majoritariamente para atendimento imediato da demanda.";
+
+    const conclusao = "Conclui-se que o sistema permanece como ativo energético estratégico, com capacidade de gerar eficiência operacional, previsibilidade financeira e inteligência de consumo quando acompanhado continuamente ao longo dos ciclos mensais.";
+
+    state.spAnalise = analise;
+    state.spLeitura = leitura;
+    state.spCreditos = creditos;
+    state.spDirecionamento = direcionamento;
+    state.spConclusao = conclusao;
+    state.spTextoCompleto = `## INDICADORES ENERGÉTICOS
+
+* Energia Gerada: ${formatarNumero(energiaGerada)} kWh
+* Energia Consumida: ${formatarNumero(energiaConsumida)} kWh
+* Energia Compensada: ${formatarNumero(energiaCompensada)} kWh
+* Crédito Acumulado: ${formatarNumero(creditoAcumulado)} kWh
+
+## ANÁLISE DE DESEMPENHO
+
+${analise}
+
+## LEITURA OPERACIONAL
+
+${leitura}
+
+## CRÉDITOS ENERGÉTICOS
+
+${creditos}
+
+## DIRECIONAMENTO ESTRATÉGICO
+
+${direcionamento}
+
+## CONCLUSÃO
+
+${conclusao}`;
+}
+
+function renderSunPrimeAuto() {
+    if (!elements.spCliente) return;
+
+    elements.spCliente.value = state.spCliente;
+    elements.spPeriodo.value = state.spPeriodo;
+    elements.spEnergiaGerada.value = state.spEnergiaGerada;
+    elements.spEnergiaConsumida.value = state.spEnergiaConsumida;
+    elements.spEnergiaCompensada.value = state.spEnergiaCompensada;
+    elements.spCreditoAcumulado.value = state.spCreditoAcumulado;
+
+    elements.spCardGerada.textContent = `${formatarNumero(parseNumero(state.spEnergiaGerada))} kWh`;
+    elements.spCardConsumida.textContent = `${formatarNumero(parseNumero(state.spEnergiaConsumida))} kWh`;
+    elements.spCardCompensada.textContent = `${formatarNumero(parseNumero(state.spEnergiaCompensada))}%`;
+    elements.spCardCredito.textContent = `${formatarNumero(parseNumero(state.spCreditoAcumulado))} kWh`;
+
+    elements.spAnalise.textContent = valorOuPadrao(state.spAnalise, "A análise de desempenho será gerada automaticamente a partir dos indicadores energéticos informados.");
+    elements.spLeitura.textContent = valorOuPadrao(state.spLeitura, "A leitura operacional consolidará o comportamento do sistema com linguagem técnica e corporativa.");
+    elements.spCreditos.textContent = valorOuPadrao(state.spCreditos, "O bloco de créditos energéticos mostrará a interpretação do saldo disponível para períodos futuros.");
+    elements.spDirecionamento.textContent = valorOuPadrao(state.spDirecionamento, "O direcionamento estratégico apontará recomendações de expansão, redistribuição ou monitoramento.");
+    elements.spConclusao.textContent = valorOuPadrao(state.spConclusao, "A conclusão executiva fechará o relatório destacando o sistema como ativo energético estratégico.");
+    elements.spTextoCompleto.textContent = valorOuPadrao(state.spTextoCompleto, `## INDICADORES ENERGÉTICOS
+
+Preencha os dados e clique em "Gerar análise" para montar automaticamente o texto completo do relatório.`);
+}
+
 function render() {
     const geracaoTotal = parseNumero(state.geracaoTotal);
     const unidades = unidadesCalculadas();
@@ -831,6 +950,7 @@ function render() {
     renderReport(distribuicao);
     renderCommercial();
     renderPerformance();
+    renderSunPrimeAuto();
     renderTabs();
 }
 
@@ -988,6 +1108,66 @@ elements.vencimentoFatura.addEventListener("input", (event) => {
         render();
     });
 });
+
+[
+    "spCliente",
+    "spPeriodo",
+    "spEnergiaGerada",
+    "spEnergiaConsumida",
+    "spEnergiaCompensada",
+    "spCreditoAcumulado"
+].forEach((key) => {
+    if (!elements[key]) return;
+    elements[key].addEventListener("input", (event) => {
+        state[key] = event.target.value;
+        render();
+    });
+});
+
+if (elements.spGerarAnalise) {
+    elements.spGerarAnalise.addEventListener("click", () => {
+        gerarAnaliseSunPrime();
+        render();
+    });
+}
+
+if (elements.spCopiarTexto) {
+    elements.spCopiarTexto.addEventListener("click", async () => {
+        const texto = state.spTextoCompleto.trim();
+        if (!texto) return;
+        try {
+            await navigator.clipboard.writeText(texto);
+        } catch {
+            const area = document.createElement("textarea");
+            area.value = texto;
+            document.body.appendChild(area);
+            area.select();
+            document.execCommand("copy");
+            area.remove();
+        }
+    });
+}
+
+if (elements.spEnviarPerformance) {
+    elements.spEnviarPerformance.addEventListener("click", () => {
+        if (!state.spAnalise.trim()) {
+            gerarAnaliseSunPrime();
+        }
+
+        state.performanceCliente = state.spCliente;
+        state.performancePeriodo = state.spPeriodo;
+        state.performanceResumo = state.spLeitura;
+        state.performanceEnergiaConsumida = state.spEnergiaConsumida;
+        state.performanceEnergiaGerada = state.spEnergiaGerada;
+        state.performanceEnergiaCompensada = state.spEnergiaCompensada;
+        state.performanceCreditoAcumulado = state.spCreditoAcumulado;
+        state.performanceAnalise = state.spAnalise;
+        state.performanceDirecionamento = state.spDirecionamento;
+        state.performanceConclusao = state.spConclusao;
+        state.abaAtual = "performance";
+        render();
+    });
+}
 
 if (elements.buscaCliente) {
     elements.buscaCliente.addEventListener("input", (event) => {
