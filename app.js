@@ -21,6 +21,22 @@ const state = {
     codigoCliente: "",
     enderecoUnidade: "",
     vencimentoFatura: "",
+    performanceCliente: "",
+    performancePeriodo: "",
+    performanceResumo: "",
+    performanceEnergiaConsumida: "",
+    performanceEnergiaGerada: "",
+    performanceEnergiaCompensada: "",
+    performanceCreditoAcumulado: "",
+    performanceGerJan: "",
+    performanceGerFev: "",
+    performanceGerMar: "",
+    performanceConsJan: "",
+    performanceConsFev: "",
+    performanceConsMar: "",
+    performanceAnalise: "",
+    performanceDirecionamento: "",
+    performanceConclusao: "",
     unidades: initialUnits
 };
 const VALOR_KWH_SEM_CREDITOS = 1.36;
@@ -44,6 +60,22 @@ const elements = {
     codigoCliente: document.querySelector("#codigoCliente"),
     enderecoUnidade: document.querySelector("#enderecoUnidade"),
     vencimentoFatura: document.querySelector("#vencimentoFatura"),
+    performanceCliente: document.querySelector("#performanceCliente"),
+    performancePeriodo: document.querySelector("#performancePeriodo"),
+    performanceResumo: document.querySelector("#performanceResumo"),
+    performanceEnergiaConsumida: document.querySelector("#performanceEnergiaConsumida"),
+    performanceEnergiaGerada: document.querySelector("#performanceEnergiaGerada"),
+    performanceEnergiaCompensada: document.querySelector("#performanceEnergiaCompensada"),
+    performanceCreditoAcumulado: document.querySelector("#performanceCreditoAcumulado"),
+    performanceGerJan: document.querySelector("#performanceGerJan"),
+    performanceGerFev: document.querySelector("#performanceGerFev"),
+    performanceGerMar: document.querySelector("#performanceGerMar"),
+    performanceConsJan: document.querySelector("#performanceConsJan"),
+    performanceConsFev: document.querySelector("#performanceConsFev"),
+    performanceConsMar: document.querySelector("#performanceConsMar"),
+    performanceAnalise: document.querySelector("#performanceAnalise"),
+    performanceDirecionamento: document.querySelector("#performanceDirecionamento"),
+    performanceConclusao: document.querySelector("#performanceConclusao"),
     adicionarUnidade: document.querySelector("#adicionarUnidade"),
     totalUnidades: document.querySelector("#totalUnidades"),
     totalDistribuido: document.querySelector("#totalDistribuido"),
@@ -84,6 +116,18 @@ const elements = {
     relatorioSemServicos: document.querySelector("#relatorioSemServicos"),
     relatorioComServicos: document.querySelector("#relatorioComServicos"),
     relatorioEconomia: document.querySelector("#relatorioEconomia"),
+    performanceReportCliente: document.querySelector("#performanceReportCliente"),
+    performanceReportPeriodo: document.querySelector("#performanceReportPeriodo"),
+    performanceReportResumo: document.querySelector("#performanceReportResumo"),
+    performanceReportEnergiaConsumida: document.querySelector("#performanceReportEnergiaConsumida"),
+    performanceReportEnergiaGerada: document.querySelector("#performanceReportEnergiaGerada"),
+    performanceReportEnergiaCompensada: document.querySelector("#performanceReportEnergiaCompensada"),
+    performanceReportCreditoAcumulado: document.querySelector("#performanceReportCreditoAcumulado"),
+    performanceChartResumo: document.querySelector("#performanceChartResumo"),
+    performanceReportAnalise: document.querySelector("#performanceReportAnalise"),
+    performanceReportDirecionamento: document.querySelector("#performanceReportDirecionamento"),
+    performanceReportConclusao: document.querySelector("#performanceReportConclusao"),
+    performanceChart: document.querySelector("#performanceChart"),
     listaUnidades: document.querySelector("#listaUnidades"),
     unidadeTemplate: document.querySelector("#unidadeTemplate")
 };
@@ -116,6 +160,10 @@ function formatarMoeda(valor) {
         style: "currency",
         currency: "BRL"
     }).format(valor);
+}
+
+function valorOuPadrao(texto, padrao) {
+    return String(texto || "").trim() || padrao;
 }
 
 function uid() {
@@ -643,6 +691,125 @@ function renderCommercial() {
     }
 }
 
+function performanceBullets() {
+    return String(state.performanceAnalise || "")
+        .split("\n")
+        .map((item) => item.trim())
+        .filter(Boolean);
+}
+
+function renderPerformanceChart() {
+    const canvas = elements.performanceChart;
+    if (!canvas) return;
+
+    const context = canvas.getContext("2d");
+    const width = canvas.width;
+    const height = canvas.height;
+    context.clearRect(0, 0, width, height);
+
+    const padding = { top: 18, right: 18, bottom: 34, left: 44 };
+    const labels = ["JAN", "FEV", "MAR"];
+    const geracao = [
+        parseNumero(state.performanceGerJan),
+        parseNumero(state.performanceGerFev),
+        parseNumero(state.performanceGerMar)
+    ];
+    const consumo = [
+        parseNumero(state.performanceConsJan),
+        parseNumero(state.performanceConsFev),
+        parseNumero(state.performanceConsMar)
+    ];
+    const maiorValor = Math.max(...geracao, ...consumo, 100);
+    const plotWidth = width - padding.left - padding.right;
+    const plotHeight = height - padding.top - padding.bottom;
+
+    context.strokeStyle = "rgba(80, 88, 98, 0.2)";
+    context.lineWidth = 1;
+    for (let i = 0; i <= 4; i += 1) {
+        const y = padding.top + (plotHeight / 4) * i;
+        context.beginPath();
+        context.moveTo(padding.left, y);
+        context.lineTo(width - padding.right, y);
+        context.stroke();
+    }
+
+    context.strokeStyle = "#b8791e";
+    context.lineWidth = 3;
+    context.beginPath();
+    geracao.forEach((valor, index) => {
+        const x = padding.left + (plotWidth / (labels.length - 1 || 1)) * index;
+        const y = padding.top + plotHeight - (valor / maiorValor) * plotHeight;
+        if (index === 0) context.moveTo(x, y);
+        else context.lineTo(x, y);
+    });
+    context.stroke();
+
+    context.strokeStyle = "#6b7280";
+    context.beginPath();
+    consumo.forEach((valor, index) => {
+        const x = padding.left + (plotWidth / (labels.length - 1 || 1)) * index;
+        const y = padding.top + plotHeight - (valor / maiorValor) * plotHeight;
+        if (index === 0) context.moveTo(x, y);
+        else context.lineTo(x, y);
+    });
+    context.stroke();
+
+    context.fillStyle = "#5b6773";
+    context.font = "12px system-ui";
+    labels.forEach((label, index) => {
+        const x = padding.left + (plotWidth / (labels.length - 1 || 1)) * index;
+        context.fillText(label, x - 12, height - 10);
+    });
+}
+
+function renderPerformance() {
+    if (!elements.performanceCliente) return;
+
+    elements.performanceCliente.value = state.performanceCliente;
+    elements.performancePeriodo.value = state.performancePeriodo;
+    elements.performanceResumo.value = state.performanceResumo;
+    elements.performanceEnergiaConsumida.value = state.performanceEnergiaConsumida;
+    elements.performanceEnergiaGerada.value = state.performanceEnergiaGerada;
+    elements.performanceEnergiaCompensada.value = state.performanceEnergiaCompensada;
+    elements.performanceCreditoAcumulado.value = state.performanceCreditoAcumulado;
+    elements.performanceGerJan.value = state.performanceGerJan;
+    elements.performanceGerFev.value = state.performanceGerFev;
+    elements.performanceGerMar.value = state.performanceGerMar;
+    elements.performanceConsJan.value = state.performanceConsJan;
+    elements.performanceConsFev.value = state.performanceConsFev;
+    elements.performanceConsMar.value = state.performanceConsMar;
+    elements.performanceAnalise.value = state.performanceAnalise;
+    elements.performanceDirecionamento.value = state.performanceDirecionamento;
+    elements.performanceConclusao.value = state.performanceConclusao;
+
+    elements.performanceReportCliente.textContent = `Cliente: ${valorOuPadrao(state.performanceCliente, "Nao informado")}`;
+    elements.performanceReportPeriodo.textContent = `Periodo: ${valorOuPadrao(state.performancePeriodo, "Nao informado")}`;
+    elements.performanceReportResumo.textContent = valorOuPadrao(state.performanceResumo, "Preencha os dados para montar o resumo do periodo.");
+    elements.performanceReportEnergiaConsumida.textContent = `${valorOuPadrao(state.performanceEnergiaConsumida, "0")} kWh`;
+    elements.performanceReportEnergiaGerada.textContent = `${valorOuPadrao(state.performanceEnergiaGerada, "0")} kWh`;
+    elements.performanceReportEnergiaCompensada.textContent = `${valorOuPadrao(state.performanceEnergiaCompensada, "0")}%`;
+    elements.performanceReportCreditoAcumulado.textContent = `${valorOuPadrao(state.performanceCreditoAcumulado, "0")} kWh`;
+    elements.performanceChartResumo.textContent = "A geracao apresentou comportamento comparado ao consumo ao longo do trimestre analisado.";
+    elements.performanceReportDirecionamento.textContent = valorOuPadrao(state.performanceDirecionamento, "Descreva o direcionamento estrategico para este cliente.");
+    elements.performanceReportConclusao.textContent = valorOuPadrao(state.performanceConclusao, "Inclua a mensagem final do relatorio.");
+
+    elements.performanceReportAnalise.innerHTML = "";
+    const bullets = performanceBullets();
+    if (!bullets.length) {
+        const item = document.createElement("li");
+        item.textContent = "Inclua pontos de analise para compor o relatorio.";
+        elements.performanceReportAnalise.appendChild(item);
+    } else {
+        bullets.forEach((bullet) => {
+            const item = document.createElement("li");
+            item.textContent = bullet;
+            elements.performanceReportAnalise.appendChild(item);
+        });
+    }
+
+    renderPerformanceChart();
+}
+
 function render() {
     const geracaoTotal = parseNumero(state.geracaoTotal);
     const unidades = unidadesCalculadas();
@@ -663,6 +830,7 @@ function render() {
     renderRelatorioMensal();
     renderReport(distribuicao);
     renderCommercial();
+    renderPerformance();
     renderTabs();
 }
 
@@ -794,6 +962,31 @@ elements.enderecoUnidade.addEventListener("input", (event) => {
 elements.vencimentoFatura.addEventListener("input", (event) => {
     state.vencimentoFatura = event.target.value;
     render();
+});
+
+[
+    "performanceCliente",
+    "performancePeriodo",
+    "performanceResumo",
+    "performanceEnergiaConsumida",
+    "performanceEnergiaGerada",
+    "performanceEnergiaCompensada",
+    "performanceCreditoAcumulado",
+    "performanceGerJan",
+    "performanceGerFev",
+    "performanceGerMar",
+    "performanceConsJan",
+    "performanceConsFev",
+    "performanceConsMar",
+    "performanceAnalise",
+    "performanceDirecionamento",
+    "performanceConclusao"
+].forEach((key) => {
+    if (!elements[key]) return;
+    elements[key].addEventListener("input", (event) => {
+        state[key] = event.target.value;
+        render();
+    });
 });
 
 if (elements.buscaCliente) {

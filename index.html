@@ -61,6 +61,7 @@
             <button class="tab-button is-active" data-tab-button="calculadora" type="button">Calculadora</button>
             <button class="tab-button" data-tab-button="relatorio" type="button">Cliente + Relatorio</button>
             <button class="tab-button" data-tab-button="comercial" type="button">Relatorio Comercial</button>
+            <button class="tab-button" data-tab-button="performance" type="button">Performance</button>
         </section>
 
         <section class="card panel client-panel" data-tab-section="relatorio">
@@ -223,6 +224,93 @@
             </div>
         </section>
 
+        <section class="card panel performance-panel" data-tab-section="performance">
+            <div class="panel-header">
+                <h2>Relatorio de Performance</h2>
+                <p>Modelo para gerar um PDF de desempenho energetico com visual institucional, inspirado no material montado no Canva.</p>
+            </div>
+
+            <div class="client-grid">
+                <label class="field">
+                    <span>Cliente</span>
+                    <input id="performanceCliente" type="text" placeholder="Ex.: Igreja Evangelica Assembleia de Deus em Pernambuco - Exu/PE">
+                </label>
+
+                <label class="field">
+                    <span>Periodo</span>
+                    <input id="performancePeriodo" type="text" placeholder="Ex.: Marco | 2026">
+                </label>
+
+                <label class="field field-wide">
+                    <span>Resumo executivo</span>
+                    <textarea id="performanceResumo" rows="4" placeholder="Descreva em 2 ou 3 frases o desempenho do periodo."></textarea>
+                </label>
+            </div>
+
+            <div class="summary-grid commercial-grid">
+                <article class="summary-card card">
+                    <span class="summary-label">Energia consumida</span>
+                    <input id="performanceEnergiaConsumida" class="summary-input" type="text" inputmode="decimal" placeholder="584">
+                </article>
+                <article class="summary-card card">
+                    <span class="summary-label">Energia gerada</span>
+                    <input id="performanceEnergiaGerada" class="summary-input" type="text" inputmode="decimal" placeholder="815">
+                </article>
+                <article class="summary-card card">
+                    <span class="summary-label">Energia compensada (%)</span>
+                    <input id="performanceEnergiaCompensada" class="summary-input" type="text" inputmode="decimal" placeholder="100">
+                </article>
+                <article class="summary-card card">
+                    <span class="summary-label">Credito acumulado</span>
+                    <input id="performanceCreditoAcumulado" class="summary-input" type="text" inputmode="decimal" placeholder="680">
+                </article>
+            </div>
+
+            <div class="performance-chart-grid">
+                <label class="field">
+                    <span>Geracao JAN</span>
+                    <input id="performanceGerJan" type="text" inputmode="decimal" placeholder="650">
+                </label>
+                <label class="field">
+                    <span>Geracao FEV</span>
+                    <input id="performanceGerFev" type="text" inputmode="decimal" placeholder="840">
+                </label>
+                <label class="field">
+                    <span>Geracao MAR</span>
+                    <input id="performanceGerMar" type="text" inputmode="decimal" placeholder="815">
+                </label>
+                <label class="field">
+                    <span>Consumo JAN</span>
+                    <input id="performanceConsJan" type="text" inputmode="decimal" placeholder="720">
+                </label>
+                <label class="field">
+                    <span>Consumo FEV</span>
+                    <input id="performanceConsFev" type="text" inputmode="decimal" placeholder="810">
+                </label>
+                <label class="field">
+                    <span>Consumo MAR</span>
+                    <input id="performanceConsMar" type="text" inputmode="decimal" placeholder="584">
+                </label>
+            </div>
+
+            <div class="client-grid">
+                <label class="field">
+                    <span>Analise de desempenho</span>
+                    <textarea id="performanceAnalise" rows="6" placeholder="Use uma linha por ponto."></textarea>
+                </label>
+
+                <label class="field">
+                    <span>Direcionamento estrategico</span>
+                    <textarea id="performanceDirecionamento" rows="6" placeholder="Explique o potencial de aproveitamento e os proximos passos."></textarea>
+                </label>
+
+                <label class="field field-wide">
+                    <span>Fechamento</span>
+                    <textarea id="performanceConclusao" rows="3" placeholder="Mensagem final do periodo."></textarea>
+                </label>
+            </div>
+        </section>
+
         <section class="card report-shell" data-tab-section="relatorio">
             <div class="report-brand">
                 <span class="report-mark">Sunprime Energy</span>
@@ -321,6 +409,59 @@
                     <span>PIX 81 99303-2035 | Nubank</span>
                 </div>
             </footer>
+        </section>
+
+        <section class="card performance-report-shell" data-tab-section="performance">
+            <div class="performance-brand">
+                <div class="performance-brand-copy">
+                    <h2>Relatorio de Performance Energetica</h2>
+                    <p id="performanceReportCliente">Cliente: -</p>
+                    <p id="performanceReportPeriodo">Periodo: -</p>
+                </div>
+                <div class="performance-brand-badge">
+                    <span>Sun Prime Energy</span>
+                </div>
+            </div>
+
+            <p id="performanceReportResumo" class="performance-summary-text">Preencha os dados para montar o resumo do periodo.</p>
+
+            <div class="performance-kpi-grid">
+                <article class="performance-kpi">
+                    <span>Energia consumida</span>
+                    <strong id="performanceReportEnergiaConsumida">0 kWh</strong>
+                </article>
+                <article class="performance-kpi">
+                    <span>Energia gerada</span>
+                    <strong id="performanceReportEnergiaGerada">0 kWh</strong>
+                </article>
+                <article class="performance-kpi">
+                    <span>Energia compensada</span>
+                    <strong id="performanceReportEnergiaCompensada">0%</strong>
+                </article>
+                <article class="performance-kpi">
+                    <span>Credito acumulado</span>
+                    <strong id="performanceReportCreditoAcumulado">0 kWh</strong>
+                </article>
+            </div>
+
+            <div class="performance-two-column">
+                <section class="performance-card-block">
+                    <h3>Evolucao de Geracao e Consumo</h3>
+                    <p id="performanceChartResumo" class="performance-card-copy">Acompanhe o comportamento mensal entre geracao e consumo.</p>
+                    <div class="performance-chart-wrap">
+                        <canvas id="performanceChart" width="420" height="260"></canvas>
+                    </div>
+                </section>
+
+                <section class="performance-card-block">
+                    <h3>Analise de Desempenho</h3>
+                    <ul id="performanceReportAnalise" class="performance-bullets"></ul>
+                    <h3>Direcionamento Estrategico</h3>
+                    <p id="performanceReportDirecionamento" class="performance-card-copy">-</p>
+                </section>
+            </div>
+
+            <p id="performanceReportConclusao" class="performance-footer-copy">-</p>
         </section>
     </main>
 
