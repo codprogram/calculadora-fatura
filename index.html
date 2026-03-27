@@ -258,7 +258,7 @@
                     <input id="performanceEnergiaGerada" class="summary-input" type="text" inputmode="decimal" placeholder="815">
                 </article>
                 <article class="summary-card card">
-                    <span class="summary-label">Energia compensada (%)</span>
+                    <span class="summary-label">Energia compensada (kWh)</span>
                     <input id="performanceEnergiaCompensada" class="summary-input" type="text" inputmode="decimal" placeholder="100">
                 </article>
                 <article class="summary-card card">
@@ -347,7 +347,7 @@
                                 <input id="spEnergiaConsumida" type="text" inputmode="decimal" placeholder="584">
                             </label>
                             <label class="field">
-                                <span>Energia compensada</span>
+                                <span>Energia compensada (kWh)</span>
                                 <input id="spEnergiaCompensada" type="text" inputmode="decimal" placeholder="100">
                             </label>
                             <label class="field">
@@ -367,8 +367,8 @@
                             <strong id="spCardConsumida">0,00 kWh</strong>
                         </article>
                         <article class="sp-kpi-card">
-                            <span>Energia Compensada</span>
-                            <strong id="spCardCompensada">0,00%</strong>
+                            <span>Energia Compensada (kWh)</span>
+                            <strong id="spCardCompensada">0,00 kWh</strong>
                         </article>
                         <article class="sp-kpi-card">
                             <span>Crédito Acumulado</span>
@@ -403,9 +403,9 @@
 
                     <article class="sp-complete-card">
                         <span class="sp-text-label">Texto Completo</span>
-                        <pre id="spTextoCompleto" class="sp-complete-text">## INDICADORES ENERGÉTICOS
+                        <textarea id="spTextoCompleto" class="sp-complete-textarea" rows="16" readonly>## INDICADORES ENERGÉTICOS
 
-Preencha os dados e clique em "Gerar análise" para montar automaticamente o texto completo do relatório.</pre>
+Preencha os dados e clique em "Gerar análise" para montar automaticamente o texto completo do relatório.</textarea>
                     </article>
                 </div>
             </div>
@@ -575,8 +575,8 @@ Preencha os dados e clique em "Gerar análise" para montar automaticamente o tex
                     <strong id="performanceReportEnergiaGerada">0 kWh</strong>
                 </article>
                 <article class="performance-kpi">
-                    <span>Energia compensada</span>
-                    <strong id="performanceReportEnergiaCompensada">0%</strong>
+                    <span>Energia compensada (kWh)</span>
+                    <strong id="performanceReportEnergiaCompensada">0 kWh</strong>
                 </article>
                 <article class="performance-kpi">
                     <span>Credito acumulado</span>

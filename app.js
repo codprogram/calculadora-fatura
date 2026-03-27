@@ -818,7 +818,7 @@ function renderPerformance() {
     elements.performanceReportResumo.textContent = valorOuPadrao(state.performanceResumo, "Preencha os dados para montar o resumo do periodo.");
     elements.performanceReportEnergiaConsumida.textContent = `${valorOuPadrao(state.performanceEnergiaConsumida, "0")} kWh`;
     elements.performanceReportEnergiaGerada.textContent = `${valorOuPadrao(state.performanceEnergiaGerada, "0")} kWh`;
-    elements.performanceReportEnergiaCompensada.textContent = `${valorOuPadrao(state.performanceEnergiaCompensada, "0")}%`;
+    elements.performanceReportEnergiaCompensada.textContent = `${valorOuPadrao(state.performanceEnergiaCompensada, "0")} kWh`;
     elements.performanceReportCreditoAcumulado.textContent = `${valorOuPadrao(state.performanceCreditoAcumulado, "0")} kWh`;
     elements.performanceChartResumo.textContent = "A geracao apresentou comportamento comparado ao consumo ao longo do trimestre analisado.";
     elements.performanceReportDirecionamento.textContent = valorOuPadrao(state.performanceDirecionamento, "Descreva o direcionamento estrategico para este cliente.");
@@ -847,29 +847,29 @@ function gerarAnaliseSunPrime() {
     const energiaCompensada = parseNumero(state.spEnergiaCompensada);
     const creditoAcumulado = parseNumero(state.spCreditoAcumulado);
 
-    let analise = "O sistema apresentou comportamento operacional consistente no período, com dados suficientes para leitura estratégica do desempenho energético.";
-    let leitura = "O cenário operacional demonstra estabilidade na relação entre geração, consumo e compensação energética.";
-    let direcionamento = "Recomenda-se manter o acompanhamento mensal e consolidar a leitura histórica para ampliar a previsibilidade energética da unidade.";
+    let analise = "O sistema apresentou comportamento operacional consistente no período, com dados suficientes para uma leitura estratégica do desempenho energético da unidade.";
+    let leitura = "A leitura operacional evidencia estabilidade na relação entre geração, consumo e compensação energética, favorecendo o acompanhamento executivo do ativo.";
+    let direcionamento = "Recomenda-se manter o acompanhamento mensal e consolidar a base histórica do sistema para ampliar a previsibilidade energética e a tomada de decisão.";
 
     if (energiaGerada > energiaConsumida) {
-        analise = "O sistema operou com geração superior ao consumo, evidenciando desempenho eficiente e formação de excedente energético ao longo do período.";
-        leitura = "A leitura operacional indica sobra energética, com capacidade de geração de valor por meio do aproveitamento técnico dos créditos formados.";
-        direcionamento = "O direcionamento estratégico sugere redistribuição de créditos, expansão para outras unidades beneficiárias ou otimização do aproveitamento energético já disponível.";
+        analise = "O sistema operou com geração superior ao consumo, evidenciando desempenho eficiente, aderência técnica favorável e formação de excedente energético no período.";
+        leitura = "A leitura operacional confirma um cenário de sobra energética, no qual a unidade não apenas atende sua demanda, mas também amplia a capacidade de geração de valor com energia excedente.";
+        direcionamento = "O direcionamento estratégico recomenda avaliar redistribuição de créditos, expansão do benefício para outras unidades ou otimização do aproveitamento energético já disponível.";
     } else if (energiaGerada === energiaConsumida && energiaGerada > 0) {
-        analise = "O sistema apresentou aderência à demanda atual, com operação estável e compensação energética adequada ao perfil de consumo da unidade.";
-        leitura = "O cenário operacional demonstra equilíbrio entre geração e consumo, com boa correspondência entre a produção fotovoltaica e a necessidade energética.";
-        direcionamento = "O direcionamento estratégico recomenda manutenção do acompanhamento e revisão periódica do crescimento de carga para preservar o equilíbrio do sistema.";
+        analise = "O sistema mostrou aderência à demanda atual, com operação estável e compensação energética compatível com o perfil de consumo observado na unidade.";
+        leitura = "O cenário operacional demonstra equilíbrio entre geração e consumo, sustentando um padrão saudável de atendimento energético e previsibilidade operacional.";
+        direcionamento = "O direcionamento estratégico recomenda manutenção do monitoramento contínuo, acompanhando crescimento de carga e eventuais variações de consumo para preservar esse equilíbrio.";
     } else if (energiaGerada < energiaConsumida) {
-        analise = "A demanda da unidade permaneceu superior à capacidade de geração observada no período, indicando necessidade maior de suporte complementar da rede elétrica.";
-        leitura = "A leitura operacional aponta cenário de equilíbrio pressionado ou defasagem energética, com geração relevante, porém insuficiente para cobertura integral da demanda.";
-        direcionamento = "O direcionamento estratégico recomenda avaliar ampliação do sistema, rebalanceamento de créditos ou readequação do perfil de consumo para elevar a eficiência global.";
+        analise = "A demanda da unidade permaneceu superior à capacidade atual de geração, indicando maior dependência complementar da rede elétrica ao longo do período.";
+        leitura = "A leitura operacional aponta cenário de equilíbrio pressionado, em que a geração segue relevante, porém abaixo do necessário para cobertura integral do consumo.";
+        direcionamento = "O direcionamento estratégico recomenda avaliar ampliação do sistema, rebalanceamento de créditos energéticos ou readequação do perfil de consumo para elevar a eficiência global.";
     }
 
     const creditos = creditoAcumulado > 0
         ? "Há saldo energético acumulado disponível para compensações futuras, fortalecendo a flexibilidade operacional e ampliando o potencial de gestão de consumo da unidade."
         : "Não há saldo acumulado relevante no período, indicando que o volume energético compensado foi direcionado majoritariamente para atendimento imediato da demanda.";
 
-    const conclusao = "Conclui-se que o sistema permanece como ativo energético estratégico, com capacidade de gerar eficiência operacional, previsibilidade financeira e inteligência de consumo quando acompanhado continuamente ao longo dos ciclos mensais.";
+    const conclusao = "Conclui-se que o sistema permanece como ativo energético estratégico, com potencial para ampliar eficiência operacional, previsibilidade energética e inteligência de gestão quando acompanhado continuamente ao longo dos ciclos mensais.";
 
     state.spAnalise = analise;
     state.spLeitura = leitura;
@@ -916,7 +916,7 @@ function renderSunPrimeAuto() {
 
     elements.spCardGerada.textContent = `${formatarNumero(parseNumero(state.spEnergiaGerada))} kWh`;
     elements.spCardConsumida.textContent = `${formatarNumero(parseNumero(state.spEnergiaConsumida))} kWh`;
-    elements.spCardCompensada.textContent = `${formatarNumero(parseNumero(state.spEnergiaCompensada))}%`;
+    elements.spCardCompensada.textContent = `${formatarNumero(parseNumero(state.spEnergiaCompensada))} kWh`;
     elements.spCardCredito.textContent = `${formatarNumero(parseNumero(state.spCreditoAcumulado))} kWh`;
 
     elements.spAnalise.textContent = valorOuPadrao(state.spAnalise, "A análise de desempenho será gerada automaticamente a partir dos indicadores energéticos informados.");
@@ -924,7 +924,7 @@ function renderSunPrimeAuto() {
     elements.spCreditos.textContent = valorOuPadrao(state.spCreditos, "O bloco de créditos energéticos mostrará a interpretação do saldo disponível para períodos futuros.");
     elements.spDirecionamento.textContent = valorOuPadrao(state.spDirecionamento, "O direcionamento estratégico apontará recomendações de expansão, redistribuição ou monitoramento.");
     elements.spConclusao.textContent = valorOuPadrao(state.spConclusao, "A conclusão executiva fechará o relatório destacando o sistema como ativo energético estratégico.");
-    elements.spTextoCompleto.textContent = valorOuPadrao(state.spTextoCompleto, `## INDICADORES ENERGÉTICOS
+    elements.spTextoCompleto.value = valorOuPadrao(state.spTextoCompleto, `## INDICADORES ENERGÉTICOS
 
 Preencha os dados e clique em "Gerar análise" para montar automaticamente o texto completo do relatório.`);
 }
