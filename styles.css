@@ -299,7 +299,7 @@ input {
     align-self: stretch;
     display: grid;
     place-items: center;
-    min-width: 148px;
+    min-width: 220px;
     padding: 12px 16px;
     border-radius: 24px;
     color: var(--accent-strong);
@@ -588,11 +588,20 @@ input {
     border-bottom: 1px solid rgba(16, 32, 48, 0.08);
 }
 
-.report-mark {
-    font-size: 1.5rem;
-    font-weight: 900;
-    color: var(--accent-strong);
-    letter-spacing: 0.02em;
+.brand-logo {
+    display: block;
+    width: 220px;
+    max-width: 100%;
+}
+
+.brand-logo svg {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+.brand-logo-compact {
+    width: 190px;
 }
 
 .report-subtitle {
@@ -972,10 +981,6 @@ input {
 
     .report-brand {
         padding-bottom: 5mm;
-    }
-
-    .report-mark {
-        font-size: 18pt;
     }
 
     .report-subtitle {
